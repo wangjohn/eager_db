@@ -1,5 +1,7 @@
 module EagerDB
-  module Processor
+  module Processors
+    extend ActiveSupport::Concern
+    include EagerDB::Processors
 
     class ClassMethods
       def find_processor(processor = nil)
@@ -15,6 +17,6 @@ module EagerDB
       end
     end
 
-    register_processor(:default, EagerDB::DefaultProcessor)
+    register_processor(:default, Processors::DefaultProcessor)
   end
 end

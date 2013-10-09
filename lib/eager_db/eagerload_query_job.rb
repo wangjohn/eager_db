@@ -5,7 +5,7 @@ module EagerDB
     def initialize(sql, created_at, query_processor = nil)
       @sql = sql
       @created_at = created_at
-      @query_processor = EagerDB::Processor.find_processor(query_processor)
+      @query_processor = EagerDB::Processors.find_processor(query_processor)
     end
 
     def perform

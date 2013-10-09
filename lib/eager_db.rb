@@ -1,4 +1,4 @@
-require "active_support/dependencies/autoload"
+require "active_support"
 
 module EagerDB
   extend ActiveSupport::Autoload
@@ -6,4 +6,7 @@ module EagerDB
   autoload :Base
   autoload :Core
   autoload :EagerloadQueryJob
+  autoload :Processor
 end
+
+p EagerDB::Processor
