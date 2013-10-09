@@ -5,7 +5,7 @@ module EagerDB
 
     autoload :DefaultProcessor
 
-    class ClassMethods
+    class << self
       def aggregate_processors(processors = [])
         processors = processors.uniq
 
