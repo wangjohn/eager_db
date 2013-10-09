@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
-  s.name        = 'eagerdb'
+  s.name        = 'eager_db'
   s.version     = '0.0.0'
   s.summary     = 'Database management layer for preloading queries'
   s.description = 'Database management layer for preloading queries'
