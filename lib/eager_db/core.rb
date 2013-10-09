@@ -2,10 +2,6 @@ require 'resque'
 
 module EagerDB
   module Core
-    def initialize
-      @resque = Resque.new
-    end
-
     # This is going to hijack the exec_query() method in the 
     # connection adapters in ActiveRecord.
     def exec_query(sql, name = nil, binds = [])
