@@ -1,7 +1,9 @@
 module EagerDB
   module Processors
+    extend ActiveSupport::Autoload
     extend ActiveSupport::Concern
-    include EagerDB::Processors
+
+    autoload :DefaultProcessor
 
     class ClassMethods
       def find_processor(processor = nil)
