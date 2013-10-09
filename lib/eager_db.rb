@@ -6,3 +6,5 @@ module EagerDB
   autoload :Base
   autoload :EagerloadQueryJob
 end
+
+EagerDB::Base.new
