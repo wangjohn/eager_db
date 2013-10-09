@@ -6,13 +6,12 @@ module EagerDB
       @resque = Resque.new
     end
 
-    def send_sql(sql)
-      result = execute(sql)
+    # This is going to hijack the exec_query() method in the 
+    # connection adapters in ActiveRecord.
+    def exec_query(sql, name = nil, binds = [])
+      result = super
       create_job(sql)
       result
-    end
-
-    def execute(sql)
     end
 
     def create_job(sql)
