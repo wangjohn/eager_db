@@ -4,7 +4,8 @@ module EagerDB
   extend ActiveSupport::Autoload
 
   autoload :Base
+  autoload :Core
   autoload :EagerloadQueryJob
 end
 
-EagerDB::Base.new
+p EagerDB::Base
