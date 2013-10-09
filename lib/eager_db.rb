@@ -6,7 +6,7 @@ module EagerDB
   autoload :Base
   autoload :Core
   autoload :EagerloadQueryJob
-  autoload :Processor
+  autoload :Processors
 end
 
-p EagerDB::Processor
+p EagerDB::Processors::DefaultProcessor

@@ -3,7 +3,8 @@ Gem::Specification.new do |s|
   s.name        = 'eager_db'
   s.version     = '0.0.0'
   s.summary     = 'Database management layer for preloading queries'
-  s.description = 'Database management layer for preloading queries'
+  s.description = "EagerDB keeps track of the SQL queries you've made and preloaders queries that you're probably about to make."
+  s.homepage    = 'https://github.com/wangjohn/eager_db'
 
   s.required_ruby_version = '>= 1.9.3'
 
