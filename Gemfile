@@ -1,4 +1,4 @@
 source "https://rubygems.org"
 
 gem 'activesupport'
-gem 'resque'
+gem 'resque', '~> 1.25'

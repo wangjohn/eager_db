@@ -7,5 +7,3 @@ module EagerDB
   autoload :Core
   autoload :EagerloadQueryJob
 end
-
-p EagerDB::Base

@@ -16,7 +16,7 @@ module EagerDB
     end
 
     def create_job(sql)
-      job = EagerloadQueryJob.new(sql)
+      Resque.enqueue(EagerloadQueryJob, sql, Time.now)
     end
   end
 end
