@@ -2,7 +2,7 @@ module EagerDB
   class SqlStatement
     attr_reader :raw_sql, :bind_values
 
-    def initialize(raw_sql, bind_values)
+    def initialize(raw_sql, bind_values = nil)
       @raw_sql = raw_sql
       @bind_values = bind_values
     end
@@ -13,11 +13,11 @@ module EagerDB
 
       attr_reader :match_sql, :preloads
 
-      def match_on(sql, bind_values)
+      def match_on(sql, bind_values = nil)
         @match_sql = SqlStatement.new(sql, bind_values)
       end
 
-      def preload(sql, bind_values)
+      def preload(sql, bind_values = nil)
         (@preloads ||= []) << SqlStatement.new(sql, bind_values)
       end
 
@@ -32,6 +32,8 @@ module EagerDB
   end
 
   class AssociationMatcherResultVariable
+    attr_reader :result, :name
+
     def initializer(result, name)
       @result = result
       @name = name
