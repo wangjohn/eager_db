@@ -8,6 +8,7 @@ module EagerDB
   autoload :EagerloadQueryJob
   autoload :Processors
   autoload :ProcessorAggregator
+  autoload :SqlStatement
 end
 
 p EagerDB::Processors::DefaultProcessor
