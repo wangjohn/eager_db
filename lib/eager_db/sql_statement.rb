@@ -3,17 +3,17 @@ module EagerDB
     attr_reader :raw_sql, :bind_values
 
     def initialize(raw_sql, bind_values = nil)
-      @raw_sql = raw_sql
-      @bind_values = bind_values
+      if bind_values
+        @raw_sql = raw_sql
+        @bind_values = bind_values
+      else
+        parse_bind_values!(raw_sql)
+      end
     end
 
     def matches?(sql)
-      if @bind_values && @bind_values.empty?
-        @raw_sql.downcase == sql.downcase
-      else
-        nonbinded_sql = remove_bind_values(sql)
-        @raw_sql.downcase == nonbinded_sql.downcase
-      end
+      nonbinded_sql = remove_bind_values(sql)
+      @raw_sql.downcase == nonbinded_sql.downcase
     end
 
     private
@@ -28,6 +28,16 @@ module EagerDB
       #       # => "SELECT * FROM users WHERE id = ? AND name = ?"
       #
       def remove_bind_values(sql)
+        sql.gsub(bind_values_regex, '?')
+      end
+
+      def parse_bind_values!(sql)
+        @bind_values = sql.scan(bind_values_regex).flatten
+        @raw_sql = remove_bind_values(sql)
+      end
+
+      def bind_values_regex
+        @bind_values_regex ||= /('.*?'|[0-9]+|\".*?\")/
       end
   end
 end

@@ -1,18 +1,5 @@
 module EagerDB
   module Processors
-    class SqlStatement
-      attr_reader :raw_sql, :bind_values
-
-      def initialize(raw_sql, bind_values = nil)
-        @raw_sql = raw_sql
-        @bind_values = bind_values
-      end
-
-      def matches?(sql)
-
-      end
-    end
-
     class DefaultProcessor
       class << self
         attr_reader :match_sql, :preloads
@@ -26,7 +13,7 @@ module EagerDB
         end
 
         def result
-          @result ||= AssociationMatcherResult.new(self)
+          @result ||= PreloaderResult.new(self)
         end
 
         def result_variable?(name)
@@ -34,8 +21,9 @@ module EagerDB
         end
 
         def process(sql)
+          statement = SqlStatement.new(sql)
           if match_sql.matches?(sql)
-            execute_preloads!(sql)
+            execute_preloads!(statement)
           end
         end
 
@@ -43,13 +31,13 @@ module EagerDB
 
           # TODO: This should go through all the preloads and execute them
           # based on the sql that is passed in.
-          def execute_preloads!(sql)
+          def execute_preloads!(sql_statement)
             raise "Unimplemented"
           end
       end
     end
 
-    class AssociationMatcherResultVariable
+    class PreloaderResultVariable
       attr_reader :result, :name
 
       def initializer(result, name)
@@ -58,7 +46,7 @@ module EagerDB
       end
     end
 
-    class AssociationMatcherResult
+    class PreloaderResult
       attr_reader :matcher
 
       def initialize(matcher)
@@ -66,7 +54,7 @@ module EagerDB
       end
 
       def get_variable(name)
-        AssociationMatcherResultVariable.new(matcher, name)
+        PreloaderResultVariable.new(matcher, name)
       end
 
       def method_missing(method, *args, &block)
