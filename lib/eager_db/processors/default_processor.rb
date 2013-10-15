@@ -7,24 +7,26 @@ module EagerDB
         @execute_method = execute_method
       end
 
-      def match_on(sql, bind_values = nil)
-        @match_sql = SqlStatement.new(sql, bind_values)
-      end
+      class << self
+        def match_on(sql, bind_values = nil)
+          @match_sql = SqlStatement.new(sql, bind_values)
+        end
 
-      def preload(sql, bind_values = nil)
-        (@preloads ||= []) << SqlStatement.new(sql, bind_values)
-      end
+        def preload(sql, bind_values = nil)
+          (@preloads ||= []) << SqlStatement.new(sql, bind_values)
+        end
 
-      def result
-        @result ||= PreloaderResult.new(self)
-      end
+        def result
+          @result ||= PreloaderResult.new(self)
+        end
 
-      def bind_value(index)
-        PreloaderBindVariable.new(index)
-      end
+        def bind_value(index)
+          PreloaderBindVariable.new(index)
+        end
 
-      def result_variable?(name)
-        true
+        def result_variable?(name)
+          true
+        end
       end
 
       def process(sql, result)
@@ -36,8 +38,6 @@ module EagerDB
 
       protected
 
-        # TODO: This should go through all the preloads and execute them
-        # based on the sql that is passed in.
         def execute_preloads!(sql_statement, result)
           @preloads.each do |preload|
             preload.execute(@execute_method, sql_statement, result)
