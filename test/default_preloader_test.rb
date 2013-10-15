@@ -1,8 +1,8 @@
 require 'eager_db'
 require 'minitest/autorun'
 
-class AssociationMatcherTest < Minitest::Test
-  class SomeMatcher < AssociationMatcher
+class DefaultPreloaderTest < Minitest::Test
+  class SomeMatcher < DefaultPreloader
     match_on "SELECT * FROM users WHERE id = ?"
 
     preload "SELECT * FROM products WHERE user_id = ?", result.id
