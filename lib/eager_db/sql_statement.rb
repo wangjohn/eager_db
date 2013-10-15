@@ -22,14 +22,14 @@ module EagerDB
       bind_vals = @bind_values.collect do |bind_value|
         if bind_value.is_a?(PreloaderResultVariable)
           result.send(bind_value.name)
-        else if bind_value.is_a?(PreloaderBindVariable)
+        elsif bind_value.is_a?(PreloaderBindVariable)
           sql_statement.bind_values[bind_value.index]
         else
           bind_value
         end
       end
 
-      execute_method.call(sql_statement.raw_sql, binds = bind_vals)
+      execute_method.call(sql_statement.raw_sql, "SQL", bind_vals)
     end
 
     private
