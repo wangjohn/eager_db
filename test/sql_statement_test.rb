@@ -32,4 +32,15 @@ class SqlStatementTest < Minitest::Test
     simple_statement = SqlStatement.new(@simple_raw)
     assert simple_statement.matches(@simple_sql)
   end
+
+  # TODO: finish writing this test.
+  def test_execute_statement
+    execute_method = Proc.new do |sql, name, binds|
+      assert "asdf", sql
+      assert "SQL", name
+      assert [], binds
+    end
+
+    SqlStatement.new(@simple_raw)
+  end
 end
