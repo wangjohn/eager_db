@@ -1,7 +1,7 @@
 require 'eager_db'
 require 'minitest/autorun'
 
-class AssociationMatcherTest < Minitest::TestCase
+class AssociationMatcherTest < Minitest::Test
   class SomeMatcher < AssociationMatcher
     match_on "SELECT * FROM users WHERE id = ?"
 
