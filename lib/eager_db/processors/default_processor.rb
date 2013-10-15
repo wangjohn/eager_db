@@ -1,46 +1,62 @@
 module EagerDB
   module Processors
     class DefaultProcessor
-      class << self
-        attr_reader :match_sql, :preloads
+      attr_reader :match_sql, :preloads
 
-        def match_on(sql, bind_values = nil)
-          @match_sql = SqlStatement.new(sql, bind_values)
+      def initialize(execute_method)
+        @execute_method = execute_method
+      end
+
+      def match_on(sql, bind_values = nil)
+        @match_sql = SqlStatement.new(sql, bind_values)
+      end
+
+      def preload(sql, bind_values = nil)
+        (@preloads ||= []) << SqlStatement.new(sql, bind_values)
+      end
+
+      def result
+        @result ||= PreloaderResult.new(self)
+      end
+
+      def bind_value(index)
+        PreloaderBindVariable.new(index)
+      end
+
+      def result_variable?(name)
+        true
+      end
+
+      def process(sql, result)
+        statement = SqlStatement.new(sql)
+        if match_sql.matches?(sql)
+          execute_preloads!(statement, result)
         end
+      end
 
-        def preload(sql, bind_values = nil)
-          (@preloads ||= []) << SqlStatement.new(sql, bind_values)
-        end
+      protected
 
-        def result
-          @result ||= PreloaderResult.new(self)
-        end
-
-        def result_variable?(name)
-          true
-        end
-
-        def process(sql)
-          statement = SqlStatement.new(sql)
-          if match_sql.matches?(sql)
-            execute_preloads!(statement)
+        # TODO: This should go through all the preloads and execute them
+        # based on the sql that is passed in.
+        def execute_preloads!(sql_statement, result)
+          @preloads.each do |preload|
+            preload.execute(@execute_method, sql_statement, result)
           end
         end
+    end
 
-        protected
+    class PreloaderBindVariable
+      attr_reader :index
 
-          # TODO: This should go through all the preloads and execute them
-          # based on the sql that is passed in.
-          def execute_preloads!(sql_statement)
-            raise "Unimplemented"
-          end
+      def initialize(index)
+        @index = index
       end
     end
 
     class PreloaderResultVariable
       attr_reader :result, :name
 
-      def initializer(result, name)
+      def initialize(result, name)
         @result = result
         @name = name
       end

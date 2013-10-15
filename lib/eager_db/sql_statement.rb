@@ -16,6 +16,22 @@ module EagerDB
       @raw_sql.downcase == nonbinded_sql.downcase
     end
 
+    # To execute a SqlStatement, you need an +execute_method+ which can be
+    # called.
+    def execute(execute_method, sql_statement, result)
+      bind_vals = @bind_values.collect do |bind_value|
+        if bind_value.is_a?(PreloaderResultVariable)
+          result.send(bind_value.name)
+        else if bind_value.is_a?(PreloaderBindVariable)
+          sql_statement.bind_values[bind_value.index]
+        else
+          bind_value
+        end
+      end
+
+      execute_method.call(sql_statement.raw_sql, binds = bind_vals)
+    end
+
     private
 
       # Removes bind values from a SQL query and replaces them with "?". This
