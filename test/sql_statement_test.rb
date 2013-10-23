@@ -1,7 +1,6 @@
-require 'eager_db'
-require 'minitest/autorun'
+require './helper'
 
-class SqlStatementTest < Minitest::Unit::TestCase
+class EagerDB::SqlStatementTest < EagerDB::Test
   def setup
     @complex_sql = "SELECT * FROM users WHERE id = 5 AND name = 'john' AND created_at > 2342342 GROUP BY name LIMIT 5"
     @simple_sql = "SELECT * FROM users WHERE id = '5' AND name = 'john'"
@@ -10,14 +9,14 @@ class SqlStatementTest < Minitest::Unit::TestCase
   end
 
   def test_sql_parsing
-    complex_statement = SqlStatement.new(@complex_sql)
+    complex_statement = EagerDB::SqlStatement.new(@complex_sql)
 
     assert_equal [5, 'john', 2342342, 5], complex_statement.bind_values
     assert_equal @complex_raw.downcase, complex_statement.raw_sql
     assert complex_statement.matches?(@complex_sql)
     assert complex_statement.matches?(@complex_raw)
 
-    simple_statement = SqlStatement.new(@simple_sql)
+    simple_statement = EagerDB::SqlStatement.new(@simple_sql)
 
     assert_equal ['5', 'john'], simple_statement.bind_values
     assert_equal @simple_raw.downcase, simple_statement.raw_sql
@@ -26,10 +25,10 @@ class SqlStatementTest < Minitest::Unit::TestCase
   end
 
   def test_sql_matching
-    complex_statement = SqlStatement.new(@complex_raw)
+    complex_statement = EagerDB::SqlStatement.new(@complex_raw)
     assert complex_statement.matches(@complex_sql)
 
-    simple_statement = SqlStatement.new(@simple_raw)
+    simple_statement = EagerDB::SqlStatement.new(@simple_raw)
     assert simple_statement.matches(@simple_sql)
   end
 
@@ -41,6 +40,6 @@ class SqlStatementTest < Minitest::Unit::TestCase
       assert [], binds
     end
 
-    SqlStatement.new(@simple_raw)
+    EagerDB::SqlStatement.new(@simple_raw)
   end
 end

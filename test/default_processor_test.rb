@@ -1,7 +1,6 @@
-require 'eager_db'
-require 'minitest/autorun'
+require './helper'
 
-class DefaultProcessor < Minitest::Unit::TestCase
+class DefaultProcessor < EagerDB::Test
   class SomeMatcher < DefaultProcessor
     match_on "SELECT * FROM users WHERE id = ?"
 

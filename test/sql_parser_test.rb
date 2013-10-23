@@ -1,7 +1,6 @@
-require 'minitest/autorun'
-require 'eager_db'
+require './helper'
 
-class SqlParserTest < Minitest::Unit::TestCase
+class SqlParserTest < EagerDB::Test
 
   def setup
     @parser = EagerDB::SqlParser.new
