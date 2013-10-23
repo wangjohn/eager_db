@@ -1,7 +1,8 @@
 require './helper'
 
+# FIXME: These tests are currently broken because the SqlParse hasn't been
+# written yet. So, I guess we should write it!
 class SqlParserTest < EagerDB::Test
-
   def setup
     @parser = EagerDB::SqlParser.new
   end

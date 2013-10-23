@@ -1,7 +1,9 @@
 require './helper'
 
-class DefaultProcessor < EagerDB::Test
-  class SomeMatcher < DefaultProcessor
+# FIXME: Currently get a stack level too deep. Maybe some recursive shit that's
+# happening when initialization the default processor?
+class DefaultProcessorTest < EagerDB::Test
+  class SomeMatcher < EagerDB::Processors::DefaultProcessor
     match_on "SELECT * FROM users WHERE id = ?"
 
     preload "SELECT * FROM products WHERE user_id = ?", result.id
