@@ -1,7 +1,7 @@
 require 'eager_db'
 require 'minitest/autorun'
 
-class DefaultProcessor < Minitest::Test
+class DefaultProcessor < Minitest::Unit::TestCase
   class SomeMatcher < DefaultProcessor
     match_on "SELECT * FROM users WHERE id = ?"
 

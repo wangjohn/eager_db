@@ -4,7 +4,7 @@ module EagerDB
   module Core
     # This is going to hijack the exec_query() method in the 
     # connection adapters in ActiveRecord.
-    def exec_query(sql, name = nil, binds = [])
+    def execute(sql, binds = [])
       result = super
       create_job(sql, result)
       result

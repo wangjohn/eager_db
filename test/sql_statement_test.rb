@@ -1,7 +1,7 @@
 require 'eager_db'
 require 'minitest/autorun'
 
-class SqlStatementTest < Minitest::Test
+class SqlStatementTest < Minitest::Unit::TestCase
   def setup
     @complex_sql = "SELECT * FROM users WHERE id = 5 AND name = 'john' AND created_at > 2342342 GROUP BY name LIMIT 5"
     @simple_sql = "SELECT * FROM users WHERE id = '5' AND name = 'john'"
