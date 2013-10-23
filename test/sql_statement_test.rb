@@ -11,25 +11,25 @@ class EagerDB::SqlStatementTest < EagerDB::Test
   def test_sql_parsing
     complex_statement = EagerDB::SqlStatement.new(@complex_sql)
 
-    assert_equal [5, 'john', 2342342, 5], complex_statement.bind_values
-    assert_equal @complex_raw.downcase, complex_statement.raw_sql
+    assert_equal ["5", "'john'", "2342342", "5"], complex_statement.bind_values
+    assert_equal @complex_raw.downcase, complex_statement.raw_sql.downcase
     assert complex_statement.matches?(@complex_sql)
     assert complex_statement.matches?(@complex_raw)
 
     simple_statement = EagerDB::SqlStatement.new(@simple_sql)
 
-    assert_equal ['5', 'john'], simple_statement.bind_values
-    assert_equal @simple_raw.downcase, simple_statement.raw_sql
+    assert_equal ["'5'", "'john'"], simple_statement.bind_values
+    assert_equal @simple_raw.downcase, simple_statement.raw_sql.downcase
     assert simple_statement.matches?(@simple_sql)
     assert simple_statement.matches?(@simple_raw)
   end
 
   def test_sql_matching
     complex_statement = EagerDB::SqlStatement.new(@complex_raw)
-    assert complex_statement.matches(@complex_sql)
+    assert complex_statement.matches?(@complex_sql)
 
     simple_statement = EagerDB::SqlStatement.new(@simple_raw)
-    assert simple_statement.matches(@simple_sql)
+    assert simple_statement.matches?(@simple_sql)
   end
 
   # TODO: finish writing this test.
