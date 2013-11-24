@@ -1,5 +1,5 @@
 module EagerDB
-  module MatchSqlStatement
+  module MatchSql
     class MatchSqlStatement
       attr_reader :match_sql, :preloads
 
@@ -61,15 +61,18 @@ module EagerDB
 
       def initialize(processor)
         @processor = processor
+        @result_variables = {}
       end
 
       def get_variable(name)
-        MatchSqlResultVariable.new(processor, name)
+        @result_variables[name] ||= MatchSqlResultVariable.new(processor, name)
       end
 
       def method_missing(method, *args, &block)
         if processor.result_variable?(method)
-          get_variable(name)
+          self.class.instance_eval do
+            define_method(method) { get_variable(method) }
+          end
         else
           super
         end

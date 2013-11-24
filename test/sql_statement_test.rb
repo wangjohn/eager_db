@@ -8,6 +8,13 @@ class EagerDB::SqlStatementTest < EagerDB::Test
     @simple_raw = "SELECT * FROM users WHERE id = ? AND name = ?"
   end
 
+  class FakeProcessor
+    VARIABLES = [:v1, :v2, :v3, :v4]
+    def result_variable?(name)
+      VARIABLES.include?(name)
+    end
+  end
+
   def test_sql_parsing
     complex_statement = EagerDB::SqlStatement.new(@complex_sql)
 
@@ -32,14 +39,13 @@ class EagerDB::SqlStatementTest < EagerDB::Test
     assert simple_statement.matches?(@simple_sql)
   end
 
-  # TODO: finish writing this test.
-  def test_execute_statement
-    execute_method = Proc.new do |sql, name, binds|
-      assert "asdf", sql
-      assert "SQL", name
-      assert [], binds
-    end
+  def test_inject_result_values
+    processor = FakeProcessor.new
+    match_result = EagerDB::MatchSql::MatchSqlResult.new(FakeProcessor.new)
+    simple_statement = EagerDB::SqlStatement.new("SELECT * FROM ?", match_result.v1)
+    result = EagerDB::QueryResult.new({v1: 'value1'})
 
-    EagerDB::SqlStatement.new(@simple_raw)
+    injected_statement = simple_statement.inject_values(result: result)
+    p injected_statement
   end
 end

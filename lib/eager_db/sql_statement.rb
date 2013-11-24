@@ -7,7 +7,8 @@ module EagerDB
         @raw_sql = raw_sql
         @bind_values = bind_values
       else
-        parse_bind_values!(raw_sql)
+        @raw_sql = remove_bind_values(raw_sql)
+        @bind_values = raw_sql.scan(bind_values_regex).flatten
       end
     end
 
@@ -16,11 +17,15 @@ module EagerDB
       @raw_sql.downcase == nonbinded_sql.downcase
     end
 
-    def inject_values(sql_statement, result)
-      bind_vals = @bind_values.collect do |bind_value|
-        if bind_value.is_a?(MatchSqlResultVariable)
+    # Options takes +:result+ and +:sql_statement+
+    def inject_values(options = {})
+      result = options[:result]
+      sql_statement = options[:sql_statement]
+
+      bind_vals = bind_values.collect do |bind_value|
+        if bind_value.is_a?(MatchSqlResultVariable) && result
           result.send(bind_value.name)
-        elsif bind_value.is_a?(MatchSqlBindValue)
+        elsif bind_value.is_a?(MatchSqlBindValue) && sql_statement
           sql_statement.bind_values[bind_value.index]
         else
           bind_value
@@ -47,11 +52,6 @@ module EagerDB
       #
       def remove_bind_values(sql)
         sql.gsub(bind_values_regex, '?')
-      end
-
-      def parse_bind_values!(sql)
-        @bind_values = sql.scan(bind_values_regex).flatten
-        @raw_sql = remove_bind_values(sql)
       end
 
       def bind_values_regex
