@@ -4,9 +4,9 @@ module EagerDB
       @processor_classes = processor_classes
     end
 
-    def process(sql)
+    def process(eagerload_query_job)
       results = @processor_classes.collect do |klass|
-        klass.process(sql)
+        klass.process(eagerload_query_job)
       end
 
       results.uniq

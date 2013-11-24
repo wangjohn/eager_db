@@ -10,5 +10,3 @@ module EagerDB
   autoload :ProcessorAggregator
   autoload :SqlStatement
 end
-
-p EagerDB::Processors::DefaultProcessor
