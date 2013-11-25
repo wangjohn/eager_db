@@ -1,6 +1,8 @@
 module EagerDB
   module Processors
     class AbstractProcessor
+      attr_reader :match_statement, :preload_statements
+
       def initialize(match_statement)
         @match_statement = match_statement
         @preload_statements = []
@@ -41,6 +43,8 @@ module EagerDB
           @preload_statements.collect do |statement|
             statement.inject_values(options)
           end
+        else
+          []
         end
       end
     end

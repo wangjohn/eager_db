@@ -19,8 +19,8 @@ module EagerDB
 
     # Options takes +:result+ and +:sql_statement+
     def inject_values(options = {})
-      result = options[:result]
-      sql_statement = options[:sql_statement]
+      result = parse_result(options)
+      sql_statement = parse_sql_statement(options)
 
       bind_vals = bind_values.collect do |bind_value|
         if bind_value.is_a?(MatchSql::MatchSqlResultVariable) && result
@@ -40,6 +40,30 @@ module EagerDB
     end
 
     private
+
+      def parse_result(options)
+        if (result = options[:result])
+          if result.is_a?(EagerDB::QueryResult)
+            result
+          elsif result.is_a?(Hash)
+            EagerDB::QueryResult.new(result)
+          else
+            raise ArgumentError, "Must pass either a QueryResult or a Hash for the :result option"
+          end
+        end
+      end
+
+      def parse_sql_statement(options)
+        if (statement = options[:sql_statement])
+          if statement.is_a?(EagerDB::SqlStatement)
+            statement
+          elsif statement.is_a?(String)
+            EagerDB::SqlStatement.new(statement)
+          else
+            raise ArgumentError, "Must pass either a SqlStatement or a String for the :sql_statement option"
+          end
+        end
+      end
 
       # Removes bind values from a SQL query and replaces them with "?". This
       # allows for comparison between the structure of two SQL statements. 

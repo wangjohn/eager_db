@@ -39,6 +39,26 @@ class EagerDB::SqlStatementTest < EagerDB::Test
     assert simple_statement.matches?(@simple_sql)
   end
 
+  def test_sql_matching_different_quotations
+    match_statement = EagerDB::SqlStatement.new("SELECT * FROM users WHERE user_id = ?")
+
+    sql_no_quotes = "SELECT * FROM users WHERE user_id = 234234"
+    assert match_statement.matches?(sql_no_quotes)
+
+    sql_quotes = "SELECT * FROM users WHERE user_id = '234234'"
+    assert match_statement.matches?(sql_quotes)
+  end
+
+  def test_sql_matching_different_capitalization
+    match_statement = EagerDB::SqlStatement.new("SELECT * FROM tab WHERE username = ?")
+
+    sql_downcase = "select * from tab where username = 'broho'"
+    assert match_statement.matches?(sql_downcase)
+
+    sql_first_capital = "Select * From tab Where username = 'dude'"
+    assert match_statement.matches?(sql_first_capital)
+  end
+
   def test_sql_matching_with_no_bind_values
     simple_statement = EagerDB::SqlStatement.new(@simple_raw)
 
