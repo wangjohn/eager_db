@@ -4,6 +4,7 @@ gem 'activesupport'
 gem 'resque', '~> 1.25'
 gem 'minitest'
 gem 'activerecord'
+gem 'rake'
 
 # To get this to run with the eager_db gem locally, you need to the two things:
 #  1. cd into your eager_db git directory.
