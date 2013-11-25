@@ -2,14 +2,11 @@ module EagerDB
   @queue = :eagerload_query
 
   class EagerloadQueryJob
-    def initialize(sql, result, created_at, processors = [])
+    attr_reader :sql, :result, :created_at
+    def initialize(sql, result, created_at)
       @sql = sql
       @result = result
       @created_at = created_at
-      @processors = EagerDB::Processors.aggregate_processors(processors)
-    end
-
-    def perform
     end
   end
 end

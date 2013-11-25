@@ -10,8 +10,12 @@ module EagerDB
         @preload_statements << preload_statement
       end
 
+      def matches?(sql)
+        @match_statement.matches?(sql)
+      end
+
       def process_preloads(sql, result)
-        if @match_statement.matches?(sql)
+        if matches?(sql)
           options = {
             result: result,
             sql_statement: @match_statement
