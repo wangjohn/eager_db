@@ -49,4 +49,23 @@ class EagerDB::SqlStatementTest < EagerDB::Test
 
     assert_equal "SELECT * FROM value1", injected_statement
   end
+
+  def test_inject_bind_values
+    processor = FakeProcessor.new
+
+    bind0 = EagerDB::MatchSql::MatchSqlBindVariable.new(0)
+    bind1 = EagerDB::MatchSql::MatchSqlBindVariable.new(1)
+    bind2 = EagerDB::MatchSql::MatchSqlBindVariable.new(2)
+
+    simple_statement = EagerDB::SqlStatement.new("SELECT * FROM ? WHERE user_id = ? AND name = ?", [bind2, bind1, bind0])
+
+    bind_value0 = 'johnny boi'
+    bind_value1 = 'sherwinning'
+    bind_value2 = 'pokerbot'
+
+    statement = EagerDB::SqlStatement.new("", [bind_value0, bind_value1, bind_value2])
+
+    injected_statement = simple_statement.inject_values(sql_statement: statement)
+    assert_equal "SELECT * FROM #{bind_value2} WHERE user_id = #{bind_value1} AND name = #{bind_value0}", injected_statement
+  end
 end
