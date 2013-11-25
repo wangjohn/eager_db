@@ -73,6 +73,8 @@ module EagerDB
           self.class.instance_eval do
             define_method(method) { get_variable(method) }
           end
+
+          get_variable(method)
         else
           super
         end

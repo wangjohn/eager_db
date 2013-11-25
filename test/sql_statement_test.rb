@@ -42,10 +42,11 @@ class EagerDB::SqlStatementTest < EagerDB::Test
   def test_inject_result_values
     processor = FakeProcessor.new
     match_result = EagerDB::MatchSql::MatchSqlResult.new(FakeProcessor.new)
-    simple_statement = EagerDB::SqlStatement.new("SELECT * FROM ?", match_result.v1)
+    simple_statement = EagerDB::SqlStatement.new("SELECT * FROM ?", [match_result.v1])
     result = EagerDB::QueryResult.new({v1: 'value1'})
 
     injected_statement = simple_statement.inject_values(result: result)
-    p injected_statement
+
+    assert_equal "SELECT * FROM value1", injected_statement
   end
 end

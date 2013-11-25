@@ -23,19 +23,19 @@ module EagerDB
       sql_statement = options[:sql_statement]
 
       bind_vals = bind_values.collect do |bind_value|
-        if bind_value.is_a?(MatchSqlResultVariable) && result
+        if bind_value.is_a?(MatchSql::MatchSqlResultVariable) && result
           result.send(bind_value.name)
-        elsif bind_value.is_a?(MatchSqlBindValue) && sql_statement
+        elsif bind_value.is_a?(MatchSql::MatchSqlBindVariable) && sql_statement
           sql_statement.bind_values[bind_value.index]
         else
           bind_value
         end
       end
 
-      counter = 0
+      counter = -1
       raw_sql.gsub(/\?/) do |bind_val_marker|
-        bind_vals[counter]
         counter += 1
+        bind_vals[counter]
       end
     end
 
