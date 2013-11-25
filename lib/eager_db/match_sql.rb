@@ -1,44 +1,5 @@
 module EagerDB
   module MatchSql
-    class MatchSqlStatement
-      attr_reader :match_sql, :preloads
-
-      def initialize(execute_method)
-        @execute_method = execute_method
-      end
-
-      def match_on(sql, bind_values = nil)
-        @match_sql = SqlStatement.new(sql, bind_values)
-      end
-
-      def preload(sql, bind_values = nil)
-        (@preloads ||= []) << SqlStatement.new(sql, bind_values)
-      end
-
-      def process(sql, result)
-        statement = SqlStatement.new(sql)
-        if match_sql.matches?(sql)
-          preloads.collect do |preload|
-            preload.inject_values(statement, result)
-          end
-        end
-      end
-
-      class << self
-        def result
-          @result ||= MatchSqlResult.new(self)
-        end
-
-        def bind_value(index)
-          MatchSqlBindVariable.new(index)
-        end
-
-        def result_variable?(name)
-          true
-        end
-      end
-    end
-
     class MatchSqlBindVariable
       attr_reader :index
 
