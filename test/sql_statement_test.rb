@@ -39,6 +39,14 @@ class EagerDB::SqlStatementTest < EagerDB::Test
     assert simple_statement.matches?(@simple_sql)
   end
 
+  def test_sql_matching_with_no_bind_values
+    simple_statement = EagerDB::SqlStatement.new(@simple_raw)
+
+    assert simple_statement.matches?(@simple_raw)
+    assert_equal [], simple_statement.bind_values
+    assert_equal @simple_raw, simple_statement.raw_sql
+  end
+
   def test_inject_result_values
     processor = FakeProcessor.new
     match_result = EagerDB::MatchSql::MatchSqlResult.new(FakeProcessor.new)
