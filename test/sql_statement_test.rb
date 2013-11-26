@@ -1,4 +1,4 @@
-require './helper'
+require 'helper'
 
 class EagerDB::SqlStatementTest < EagerDB::Test
   def setup

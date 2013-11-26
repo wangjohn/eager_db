@@ -1,4 +1,4 @@
-require './helper'
+require 'helper'
 
 # FIXME: These tests are currently broken because the SqlParse hasn't been
 # written yet. So, I guess we should write it!
