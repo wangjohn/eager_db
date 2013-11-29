@@ -1,7 +1,5 @@
 require './helper'
 
-# FIXME: These tests are currently broken because the SqlParse hasn't been
-# written yet. So, I guess we should write it!
 class SqlParserTest < EagerDB::Test
   def test_single_bind_value_statement
     sql = "SELECT * FROM some_table WHERE name = 'hello'"

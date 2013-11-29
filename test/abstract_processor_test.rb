@@ -38,5 +38,4 @@ class AbstractProcessorTest < EagerDB::Test
     assert_equal 1, result.length
     assert_equal "SELECT * FROM parents WHERE parent_id = 234242", result[0]
   end
-
 end
