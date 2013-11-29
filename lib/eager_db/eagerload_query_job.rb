@@ -3,18 +3,19 @@ module EagerDB
 
   class EagerloadQueryJob
     attr_reader :sql, :result, :created_at, :processor_aggregator
-    def initialize(sql, result, created_at, processor_aggregator)
-      @sql = sql
-      @result = result
-      @created_at = created_at
+    def initialize(options)
+      @sql = options[:sql]
+      @result = options[:result]
+      @created_at = options[:created_at]
 
-      @processor_aggregator = processor_aggregator
+      @processor_aggregator = options[:processor_aggregator]
     end
 
     def work
-      result = processor_aggregator.process_job(self)
-      if !result.empty?
-        communication_channel.database_job(
+      preloads = processor_aggregator.process_job(self)
+      unless preloads.empty?
+        message = Message.new(preloads)
+        communication_channel.send_database_message(message)
       end
     end
   end

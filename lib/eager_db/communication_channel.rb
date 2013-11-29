@@ -18,6 +18,14 @@ module EagerDB
       @database_endpoint = database_endpoint
       @eager_db_endpoint = eager_db_endpoint
     end
+
+    def send_database_message(message)
+      @database_endpoint.process_payload(message)
+    end
+
+    def send_eager_db_message(message)
+      @eager_db_endpoint.process_payload(message)
+    end
   end
 
   class Message
@@ -34,6 +42,7 @@ module EagerDB
     end
   end
 
+  # TODO: Figure out how to process this.
   class DatabaseEndpoint < AbstractEndpoint
     def initialize
     end
@@ -52,7 +61,14 @@ module EagerDB
     end
 
     def process_payload(message)
-      @resque << EagerloadQueryJob.new(message.payload[:sql], message.payload[:result], Time.now, processor_aggregator)
+      options = {
+        sql: message.payload[:sql],
+        result: message.payload[:result],
+        created_at: Time.now,
+        processor_aggregator: processor_aggregator
+      }
+
+      @resque << EagerloadQueryJob.new(options)
     end
   end
 end
