@@ -1,9 +1,10 @@
 module EagerDB
-  @queue = :eagerload_query
-
   class EagerloadQueryJob
     attr_reader :sql, :result, :created_at, :processor_aggregator
-    def initialize(options)
+
+    def initialize(options = {})
+      validate_options!(options)
+
       @sql = options[:sql]
       @result = options[:result]
       @created_at = options[:created_at]
@@ -18,5 +19,15 @@ module EagerDB
         communication_channel.send_database_message(message)
       end
     end
+
+    private
+
+      def validate_options!(options)
+        [:sql, :result, :created_at, :processor_aggregator].each do |opt|
+          unless options[opt]
+            raise ArgumentError, "EagerloadQueryJob must included the '#{opt}' option."
+          end
+        end
+      end
   end
 end
