@@ -47,7 +47,7 @@ class AbstractProcessorAggregatorTest < EagerDB::Test
     @processor_aggregator.add_processor(processor1)
 
     processor2 = EagerDB::Processors::AbstractProcessor.new(match_statement)
-    preload2 = EagerDB::SqlStatement.new("SELECT * FROM suits WHERE suit_name = ?", [processor1.match_bind_value(0)])
+    preload2 = EagerDB::SqlStatement.new("SELECT * FROM suits WHERE suit_name = ?", [processor2.match_bind_value(0)])
     processor2.add_preload_statement(preload2)
     @processor_aggregator.add_processor(processor2)
 

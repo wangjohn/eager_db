@@ -20,7 +20,7 @@ module EagerDB
       def process_job(query_job)
         statement = EagerDB::SqlStatement.new(query_job.sql)
         preloads = matching_processors(statement.raw_sql).collect do |processor|
-          processor.process_preloads(statement.raw_sql, query_job.result)
+          processor.process_preloads(statement, query_job.result)
         end
 
         preloads.flatten

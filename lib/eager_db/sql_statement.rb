@@ -13,7 +13,12 @@ module EagerDB
     end
 
     def matches?(sql)
-      nonbinded_sql = remove_bind_values(sql)
+      if sql.is_a?(SqlStatement)
+        nonbinded_sql = sql.raw_sql
+      else
+        nonbinded_sql = remove_bind_values(sql)
+      end
+
       @raw_sql.downcase == nonbinded_sql.downcase
     end
 
