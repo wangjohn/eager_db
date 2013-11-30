@@ -27,12 +27,4 @@ module EagerDB
       @eager_db_endpoint.process_payload(message)
     end
   end
-
-  class Message
-    attr_reader :payload
-
-    def initialize(payload)
-      @payload = payload
-    end
-  end
 end

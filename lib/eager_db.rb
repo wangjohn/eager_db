@@ -9,6 +9,7 @@ module EagerDB
   autoload :Endpoints
   autoload :EagerloadQueryJob
   autoload :MatchSql
+  autoload :Message
   autoload :Processors
   autoload :ProcessorAggregator
   autoload :SqlStatement

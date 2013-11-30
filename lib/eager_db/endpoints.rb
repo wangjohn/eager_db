@@ -2,7 +2,7 @@ module EagerDB
   module Endpoints
     class AbstractEndpoint
       def process_payload(message)
-        raise "AbstractEndpoint cannot process payload because it's abstract."
+        raise NoMethodError, "AbstractEndpoint cannot process payload because it's abstract."
       end
     end
 
