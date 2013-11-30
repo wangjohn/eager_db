@@ -37,7 +37,7 @@ module EagerDB
         if matches?(sql)
           options = {
             result: result,
-            sql_statement: @match_statement
+            sql_statement: sql
           }
 
           @preload_statements.collect do |statement|

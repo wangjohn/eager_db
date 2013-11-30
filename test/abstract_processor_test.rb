@@ -38,4 +38,12 @@ class AbstractProcessorTest < EagerDB::Test
     assert_equal 1, result.length
     assert_equal "SELECT * FROM parents WHERE parent_id = 234242", result[0]
   end
+
+  def test_preload_processing_for_bind_variable
+    @processor.preload("SELECT * FROM parents WHERE parent_id = ?", [@processor.match_bind_value(0)])
+
+    result = @processor.process_preloads("SELECT * FROM users WHERE user_id = 3452123", {})
+    assert_equal 1, result.length
+    assert_equal "SELECT * FROM parents WHERE parent_id = 3452123", result[0]
+  end
 end
