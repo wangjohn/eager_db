@@ -52,12 +52,38 @@ class AbstractProcessorAggregatorTest < EagerDB::Test
     @processor_aggregator.add_processor(processor2)
 
     assert_equal 2, @processor_aggregator.processors.length
-
     result = @processor_aggregator.process_job(job)
 
     assert result.is_a?(Array)
     assert_equal 2, result.length
     assert_equal "SELECT * FROM products WHERE user_name = 'john'", result[0]
     assert_equal "SELECT * FROM suits WHERE suit_name = 'john'", result[1]
+  end
+
+  def test_multiple_processors_where_only_one_matches
+    job = EagerDB::EagerloadQueryJob.new(
+      sql: "SELECT * FROM users WHERE name = 'john'",
+      result: { id: 12345 },
+      processor_aggregator: @processor_aggregator)
+
+    match_statement1 = EagerDB::SqlStatement.new("SELECT * FROM users WHERE name = ?")
+    processor1 = EagerDB::Processors::AbstractProcessor.new(match_statement1)
+    preload1 = EagerDB::SqlStatement.new("SELECT * FROM products WHERE user_name = ? AND id = ?", 
+                                         [processor1.match_bind_value(0), processor1.match_result.id])
+    processor1.add_preload_statement(preload1)
+    @processor_aggregator.add_processor(processor1)
+
+    match_statement2 = EagerDB::SqlStatement.new("SELECT * FROM poopies WHERE id = ?")
+    processor2 = EagerDB::Processors::AbstractProcessor.new(match_statement2)
+    preload2 = EagerDB::SqlStatement.new("SELECT * FROM suits WHERE suit_name = ?", [processor2.match_bind_value(0)])
+    processor2.add_preload_statement(preload2)
+    @processor_aggregator.add_processor(processor2)
+
+    assert_equal 2, @processor_aggregator.processors.length
+    result = @processor_aggregator.process_job(job)
+
+    assert result.is_a?(Array)
+    assert_equal 1, result.length
+    assert_equal "SELECT * FROM products WHERE user_name = 'john' AND id = 12345", result[0]
   end
 end
