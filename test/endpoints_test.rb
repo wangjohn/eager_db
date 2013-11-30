@@ -41,3 +41,55 @@ class DatabaseEndpointTest < EagerDB::Test
     assert_equal [q1, q2, q3], @history
   end
 end
+
+class EagerDBEndpointTest < EagerDB::Test
+  def setup
+    @resque = []
+    @processor_aggregator = "Some string that will stand in for an aggregator"
+    @endpoint = EagerDB::Endpoints::EagerDBEndpoint.new(@resque, @processor_aggregator)
+  end
+
+  def test_creates_simple_job
+    statement = "SELECT * FROM tables WHERE name = 'john'"
+    message = EagerDB::Message.new({sql: statement})
+    @endpoint.process_payload(message)
+
+    assert_equal 1, @resque.length
+    assert @resque[0].is_a?(EagerDB::EagerloadQueryJob)
+    assert_equal statement, @resque[0].sql
+  end
+
+  def test_creates_multiple_jobs
+    q1 = "First query"
+    q2 = "Second query"
+    q3 = "This is the third query"
+
+    @endpoint.process_payload(EagerDB::Message.new(sql: q1))
+    @endpoint.process_payload(EagerDB::Message.new(sql: q2))
+    @endpoint.process_payload(EagerDB::Message.new(sql: q3))
+
+    assert_equal 3, @resque.length
+    @resque.each do |job|
+      assert job.is_a?(EagerDB::EagerloadQueryJob)
+    end
+  end
+
+  def test_can_remove_and_add_jobs_to_the_resque
+    assert_equal 0, @resque.length
+    @endpoint.process_payload(EagerDB::Message.new(sql: "Some Query"))
+    assert_equal 1, @resque.length
+
+    assert @resque.pop.is_a?(EagerDB::EagerloadQueryJob)
+    assert_equal 0, @resque.length
+
+    @endpoint.process_payload(EagerDB::Message.new(sql: "Some Query"))
+    @endpoint.process_payload(EagerDB::Message.new(sql: "Some Query"))
+    assert_equal 2, @resque.length
+
+    assert @resque.pop.is_a?(EagerDB::EagerloadQueryJob)
+    assert_equal 1, @resque.length
+
+    @endpoint.process_payload(EagerDB::Message.new(sql: "Some Query"))
+    assert_equal 2, @resque.length
+  end
+end

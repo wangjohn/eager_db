@@ -7,7 +7,7 @@ module EagerDB
 
       @sql = options[:sql]
       @result = options[:result] || {}
-      @created_at = options[:created_at]
+      @created_at = options[:created_at] || Time.now
 
       @processor_aggregator = options[:processor_aggregator]
     end
@@ -23,7 +23,7 @@ module EagerDB
     private
 
       def validate_options!(options)
-        [:sql, :created_at, :processor_aggregator].each do |opt|
+        [:sql, :processor_aggregator].each do |opt|
           unless options[opt]
             raise ArgumentError, "EagerloadQueryJob must included the '#{opt}' option."
           end
