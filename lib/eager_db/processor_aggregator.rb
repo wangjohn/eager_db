@@ -1,6 +1,8 @@
 module EagerDB
   module ProcessorAggregator
     class AbstractProcessorAggregator
+      attr_reader :processors
+
       def initialize
         @processors = []
       end
