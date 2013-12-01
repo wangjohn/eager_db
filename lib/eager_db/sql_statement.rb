@@ -4,6 +4,10 @@ module EagerDB
 
     def initialize(raw_sql, bind_values = nil)
       if bind_values
+        unless bind_values.is_a?(Array)
+          raise ArgumentError, "Bind values must be given in an array."
+        end
+
         @raw_sql = raw_sql
         @bind_values = bind_values
       else
