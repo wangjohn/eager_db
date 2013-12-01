@@ -1,18 +1,23 @@
 module EagerDB
   class EagerloadQueryJob
-    attr_reader :sql, :result, :created_at, :processor_aggregator
+    attr_reader :sql, :result, :created_at, :processor_aggregator, :communication_channel
 
     def initialize(options = {})
       validate_options!(options)
 
       @sql = options[:sql]
+      @processor_aggregator = options[:processor_aggregator]
+      @communication_channel = options[:communication_channel]
+
       @result = options[:result] || {}
       @created_at = options[:created_at] || Time.now
-
-      @processor_aggregator = options[:processor_aggregator]
     end
 
     def work
+      unless communication_channel
+        raise ArgumentError, "Cannot process EagerloadQueryJobs without a communication channel being set."
+      end
+
       preloads = processor_aggregator.process_job(self)
       unless preloads.empty?
         message = Message.new(preloads)
