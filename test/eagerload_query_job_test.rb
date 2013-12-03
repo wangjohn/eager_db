@@ -8,8 +8,7 @@ class EagerloadQueryJobTest < EagerDB::Test
 
   def create_aggregator
     aggregator = EagerDB::ProcessorAggregator::AbstractProcessorAggregator.new
-    match_statement = EagerDB::SqlStatement.new("SELECT * FROM users WHERE name = ?")
-    processor = EagerDB::Processors::AbstractProcessor.new(match_statement)
+    processor = EagerDB::Processors::AbstractProcessor.new("SELECT * FROM users WHERE name = ?")
     processor.preload("SELECT * FROM products WHERE user_name = ?", [processor.match_bind_value(0)])
     aggregator.add_processor(processor)
 
