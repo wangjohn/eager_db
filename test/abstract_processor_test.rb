@@ -6,6 +6,13 @@ class AbstractProcessorTest < EagerDB::Test
     @processor = EagerDB::Processors::AbstractProcessor.new(@match_statement)
   end
 
+  def test_abstract_processor_initializes_with_string
+    processor = EagerDB::Processors::AbstractProcessor.new("SELECT * FROM users WHERE user_id = ?")
+
+    assert_equal 0, processor.preload_statements.length
+    assert processor.match_statement.is_a?(EagerDB::SqlStatement)
+  end
+
   def test_basic_preloading
     preload = EagerDB::SqlStatement.new("SELECT * FROM products WHERE user_id = ?", [@processor.match_result.user_id])
     @processor.add_preload_statement(preload)
