@@ -5,6 +5,9 @@ module EagerDB
   class FileConverter
     attr_reader :processor_aggregator
 
+    PROCESSOR_REGEX = /^\s*-/
+    PRELOAD_REGEX = /^\s*=>/
+
     def initialize(processor_aggregator)
       @processor_aggregator = processor_aggregator
     end
@@ -28,9 +31,9 @@ module EagerDB
     private
 
       def handle_line(line, processors, counter)
-        if /^\s*-/ =~ line
+        if PROCESSOR_REGEX =~ line
           handle_processor(line, processors, counter)
-        elsif /^\s*=>/ =~ line
+        elsif PRELOAD_REGEX =~ line
           handle_preload(line, processors, counter)
         end
       end
