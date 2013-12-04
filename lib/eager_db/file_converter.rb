@@ -56,7 +56,7 @@ module EagerDB
 
         line.split(",").each_with_index do |value, index|
           if index > 0
-            binds << previous_processor.send(value)
+            binds << previous_processor.send(value.strip)
           end
         end
 
