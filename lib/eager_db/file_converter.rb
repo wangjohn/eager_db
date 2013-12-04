@@ -56,7 +56,8 @@ module EagerDB
 
         line.split(",").each_with_index do |value, index|
           if index > 0
-            binds << previous_processor.send(value.strip)
+            method_chain = value.split(".")
+            binds << method_chain.inject(previous_processor) { |result, method| result.send(method) }
           end
         end
 
