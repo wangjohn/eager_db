@@ -1,4 +1,4 @@
-require './helper'
+require 'helper'
 
 class AbstractEndpointTest < EagerDB::Test
   def test_abstract_endpoint_cannot_be_called
