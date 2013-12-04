@@ -31,6 +31,15 @@ class EagerDB::SqlStatementTest < EagerDB::Test
     assert simple_statement.matches?(@simple_raw)
   end
 
+  def test_raise_error_when_bind_values_are_not_an_array
+    assert_raises ArgumentError do
+      EagerDB::SqlStatement.new(@simple_raw, 'a bind value')
+    end
+    assert_raises ArgumentError do
+      EagerDB::SqlStatement.new(@simple_raw, {s: 1, b: 2})
+    end
+  end
+
   def test_sql_matching
     complex_statement = EagerDB::SqlStatement.new(@complex_raw)
     assert complex_statement.matches?(@complex_sql)

@@ -4,7 +4,7 @@ module EagerDB
       attr_reader :match_statement, :preload_statements
 
       def initialize(match_statement)
-        @match_statement = match_statement
+        @match_statement = construct_match_statement(match_statement)
         @preload_statements = []
         @match_sql_result = MatchSql::MatchSqlResult.new(self)
       end
@@ -37,7 +37,7 @@ module EagerDB
         if matches?(sql)
           options = {
             result: result,
-            sql_statement: @match_statement
+            sql_statement: sql
           }
 
           @preload_statements.collect do |statement|
@@ -47,6 +47,16 @@ module EagerDB
           []
         end
       end
+
+      private
+
+        def construct_match_statement(statement)
+          if statement.is_a?(EagerDB::SqlStatement)
+            statement
+          else
+            EagerDB::SqlStatement.new(statement)
+          end
+        end
     end
   end
 end

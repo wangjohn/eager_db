@@ -6,6 +6,13 @@ class AbstractProcessorTest < EagerDB::Test
     @processor = EagerDB::Processors::AbstractProcessor.new(@match_statement)
   end
 
+  def test_abstract_processor_initializes_with_string
+    processor = EagerDB::Processors::AbstractProcessor.new("SELECT * FROM users WHERE user_id = ?")
+
+    assert_equal 0, processor.preload_statements.length
+    assert processor.match_statement.is_a?(EagerDB::SqlStatement)
+  end
+
   def test_basic_preloading
     preload = EagerDB::SqlStatement.new("SELECT * FROM products WHERE user_id = ?", [@processor.match_result.user_id])
     @processor.add_preload_statement(preload)
@@ -39,4 +46,11 @@ class AbstractProcessorTest < EagerDB::Test
     assert_equal "SELECT * FROM parents WHERE parent_id = 234242", result[0]
   end
 
+  def test_preload_processing_for_bind_variable
+    @processor.preload("SELECT * FROM parents WHERE parent_id = ?", [@processor.match_bind_value(0)])
+
+    result = @processor.process_preloads("SELECT * FROM users WHERE user_id = 3452123", {})
+    assert_equal 1, result.length
+    assert_equal "SELECT * FROM parents WHERE parent_id = 3452123", result[0]
+  end
 end
