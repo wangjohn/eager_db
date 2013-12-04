@@ -40,7 +40,7 @@ module EagerDB
 
         if match_statement
           processor = Processors::AbstractProcessor.new(match_statement)
-          processors < processor
+          processors << processor
         else
           raise FileConverterError, "Parse error in line #{counter}: #{line}"
         end
@@ -72,7 +72,7 @@ module EagerDB
         if File.file?(filename)
           File.new(filename, 'r')
         else
-          raise FileConverterError, "Filename specified is not a regular file or does not exist."
+          raise FileConverterError, "Filename specified is not a regular file or does not exist: #{filename}"
         end
       end
   end

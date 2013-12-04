@@ -8,6 +8,7 @@ module EagerDB
   autoload :Core
   autoload :Endpoints
   autoload :EagerloadQueryJob
+  autoload :FileConverter
   autoload :MatchSql
   autoload :Message
   autoload :Processors
