@@ -7,12 +7,14 @@ class FileConverterTest < EagerDB::Test
   end
 
   def test_basic_converter_file
-    p filepath("basic_conversion")
     @converter.convert_file_processors(filepath("basic_conversion"))
 
     assert_equal 2, @aggregator.processors.length
     assert_equal 1, @aggregator.processors[0].preload_statements.length
     assert_equal 2, @aggregator.processors[1].preload_statements.length
+
+    assert @aggregator.processors[0].matches?("SELECT * FROM users WHERE name = 'ryan'")
+    assert @aggregator.processors[1].matches?("SELECT * FROM pinterest WHERE pin = 5 AND interest = 'balooga whales'")
   end
 
   def filepath(name)
