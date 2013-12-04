@@ -1,4 +1,4 @@
-require 'helper'
+require 'cases/helper'
 
 class EagerloadQueryJobTest < EagerDB::Test
   def setup

@@ -1,4 +1,4 @@
-require 'helper'
+require 'cases/helper'
 
 class AbstractProcessorTest < EagerDB::Test
   def setup

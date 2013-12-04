@@ -1,4 +1,4 @@
-require 'helper'
+require 'cases/helper'
 
 class SqlParserTest < EagerDB::Test
   def test_single_bind_value_statement
