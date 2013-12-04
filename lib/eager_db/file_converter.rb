@@ -54,14 +54,27 @@ module EagerDB
           raise FileConverterError, "Preload was defined before any match statement."
         end
 
-        line.split(",").each_with_index do |value, index|
+        line.split(",").each_with_index do |bind_string, index|
           if index > 0
-            method_chain = value.split(".")
-            binds << method_chain.inject(previous_processor) { |result, method| result.send(method) }
+            binds << generate_bind_value(bind_string, previous_processor)
           end
         end
 
         previous_processor.preload(preload_sql, binds)
+      end
+
+      def generate_bind_value(bind_string, processor)
+        method_chain = bind_string.strip.split(".")
+        method_chain.inject(processor) do |result, method|
+          if (method_match = /\(.*\)/.match(method))
+            method_name = method.gsub(/\(.*\)/, "")
+            method_arguments = method_match[0].split(",")
+
+            result.send(method_name, *method_arguments)
+          else
+            result.send(method)
+          end
+        end
       end
 
       def sql_statement(line)
