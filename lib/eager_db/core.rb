@@ -2,9 +2,10 @@ require 'resque'
 
 module EagerDB
   module Core
-    def create_channel(db_proc, processor_aggregator = nil)
-      processor_aggregator ||= ProcessorAggregator::AbstractProcessorAggregator.new
-      resque ||= Resque
+    def create_channel(db_proc, options = {})
+      processor_aggregator = options[:processor_aggregator] ||
+        ProcessorAggregator::AbstractProcessorAggregator.new
+      resque = options[:resque] || Resque
 
       db_endpoint = Endpoints::DatabaseEndpoint.new(db_proc)
       eager_db_endpoint = Endpoints::EagerDBEndpoint.new(resque, processor_aggregator)
