@@ -58,7 +58,8 @@ module EagerDB
           processor_aggregator: processor_aggregator
         }
 
-        @resque << EagerloadQueryJob.new(options)
+        job = EagerloadQueryJob.new(options)
+        @resque.enqueue(ResqueEagerloadQueryJob, job)
       end
     end
   end

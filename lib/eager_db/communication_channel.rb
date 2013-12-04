@@ -26,5 +26,10 @@ module EagerDB
     def send_eager_db_message(message)
       @eager_db_endpoint.process_payload(message)
     end
+
+    def process_sql(sql, result = nil)
+      message = Message.new({sql: sql, result: result})
+      send_eager_db_message(message)
+    end
   end
 end

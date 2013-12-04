@@ -2,16 +2,14 @@ require 'resque'
 
 module EagerDB
   module Core
-    # This is going to hijack the exec_query() method in the 
-    # connection adapters in ActiveRecord.
-    def execute(sql, binds = [])
-      result = super
-      create_job(sql, result)
-      result
-    end
+    def create_channel(db_proc, processor_aggregator = nil)
+      processor_aggregator ||= ProcessorAggregator::AbstractProcessorAggregator.new
+      resque ||= Resque
 
-    def create_job(sql, result)
-      Resque.enqueue(EagerloadQueryJob, sql, result, Time.now)
+      db_endpoint = Endpoints::DatabaseEndpoint.new(db_proc)
+      eager_db_endpoint = Endpoints::EagerDBEndpoint.new(resque, processor_aggregator)
+
+      CommunicationChannel.new(db_endpoint, eager_db_endpoint)
     end
   end
 end

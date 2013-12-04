@@ -1,4 +1,12 @@
 module EagerDB
+  class ResqueEagerloadQueryJob
+    @queue = :eagerload
+
+    def self.perform(job)
+      job.work
+    end
+  end
+
   class EagerloadQueryJob
     attr_reader :sql, :result, :created_at, :processor_aggregator, :communication_channel
 
