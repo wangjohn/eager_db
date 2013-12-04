@@ -1,5 +1,10 @@
 module EagerDB
+  class FileConverterError < StandardError
+  end
+
   class FileConverter
+    attr_reader :processor_aggregator
+
     def initialize(processor_aggregator)
       @processor_aggregator = processor_aggregator
     end
@@ -9,14 +14,14 @@ module EagerDB
 
       processors = []
       counter = 0
-      begin
-        while (line = file.gets)
-          handle_line(line, processors, counter)
-          counter = counter + 1
-        end
-        file.close
-      rescue => err
-        puts "Exception in reading file: #{err}"
+      while (line = file.gets)
+        handle_line(line, processors, counter)
+        counter = counter + 1
+      end
+      file.close
+
+      processors.each do |p|
+        processor_aggregator.add_processor(p)
       end
     end
 
@@ -37,13 +42,25 @@ module EagerDB
           processor = Processors::AbstractProcessor.new(match_statement)
           processors < processor
         else
-          raise ArgumentError, "Parse error in line #{counter}: #{line}"
+          raise FileConverterError, "Parse error in line #{counter}: #{line}"
         end
       end
 
       def handle_preload(line, processors, counter)
         preload_sql = sql_statement(line)
         binds = []
+        previous_processor = processors.last
+        unless previous_processor
+          raise FileConverterError, "Preload was defined before any match statement."
+        end
+
+        line.split(",").each_with_index do |value, index|
+          if index > 0
+            binds << previous_processor.send(value)
+          end
+        end
+
+        previous_processor.preload(preload_sql, binds)
       end
 
       def sql_statement(line)
@@ -55,7 +72,7 @@ module EagerDB
         if File.file?(filename)
           File.new(filename, 'r')
         else
-          raise ArgumentError, "Filename specified is not a regular file or does not exist."
+          raise FileConverterError, "Filename specified is not a regular file or does not exist."
         end
       end
   end
