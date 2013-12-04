@@ -1,5 +1,5 @@
 module EagerDB
   class Base
-    include Core
+    extend Core
   end
 end
