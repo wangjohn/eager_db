@@ -63,7 +63,7 @@ module EagerDB
           sql: message.payload[:sql],
           result: message.payload[:result],
           created_at: Time.now,
-          processor_aggregator: processor_aggregator
+          processor_aggregator: processor_aggregator,
           communication_channel: communication_channel
         }
 
