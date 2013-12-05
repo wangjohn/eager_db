@@ -1,8 +1,14 @@
 module EagerDB
   module Endpoints
     class AbstractEndpoint
+      attr_reader :communication_channel
+
       def process_payload(message)
         raise NoMethodError, "AbstractEndpoint cannot process payload because it's abstract."
+      end
+
+      def set_communication_channel(channel)
+        @communication_channel = channel
       end
     end
 
@@ -24,6 +30,8 @@ module EagerDB
     #
     # This would executive the SQL statement of the message payload.
     class DatabaseEndpoint < AbstractEndpoint
+      attr_reader :communication_channel
+
       def initialize(db_proc)
         @db_proc = db_proc
       end
@@ -56,6 +64,7 @@ module EagerDB
           result: message.payload[:result],
           created_at: Time.now,
           processor_aggregator: processor_aggregator
+          communication_channel: communication_channel
         }
 
         job = EagerloadQueryJob.new(options)

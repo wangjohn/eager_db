@@ -17,6 +17,9 @@ module EagerDB
     def initialize(database_endpoint, eager_db_endpoint)
       @database_endpoint = database_endpoint
       @eager_db_endpoint = eager_db_endpoint
+
+      @database_endpoint.set_communication_channel(self)
+      @eager_db_endpoint.set_communication_channel(self)
     end
 
     def send_database_message(message)
