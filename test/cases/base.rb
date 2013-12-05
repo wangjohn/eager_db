@@ -24,8 +24,9 @@ class BaseTest < EagerDB::Test
     }
     channel = EagerDB::Base.create_channel(db_proc, options)
 
-    channel.process_sql("SELECT * FROM users WHERE name = 'ryan'")
+    channel.process_sql("SELECT * FROM users WHERE name = 'ryan'", { id: '12345' })
 
     assert_equal 1, history.length
+    assert_equal ["SELECT * FROM products WHERE owner_id = 12345"], history.flatten
   end
 end
