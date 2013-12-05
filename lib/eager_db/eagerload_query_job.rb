@@ -22,10 +22,6 @@ module EagerDB
     end
 
     def work
-      unless communication_channel
-        raise ArgumentError, "Cannot process EagerloadQueryJobs without a communication channel being set."
-      end
-
       preloads = processor_aggregator.process_job(self)
       unless preloads.empty?
         message = Message.new(preloads)
@@ -36,9 +32,9 @@ module EagerDB
     private
 
       def validate_options!(options)
-        [:sql, :processor_aggregator].each do |opt|
+        [:sql, :processor_aggregator, :communication_channel].each do |opt|
           unless options[opt]
-            raise ArgumentError, "EagerloadQueryJob must included the '#{opt}' option."
+            raise ArgumentError, "EagerloadQueryJob must include the '#{opt}' option."
           end
         end
       end
