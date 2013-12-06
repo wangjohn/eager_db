@@ -69,9 +69,9 @@ module EagerDB
       def generate_bind_value(bind_string, processor)
         method_chain = bind_string.strip.split(".")
         method_chain.inject(processor) do |result, method|
-          if (method_match = /\(.*\)/.match(method))
+          if (method_match = /\((.*)\)/.match(method))
             method_name = method.gsub(/\(.*\)/, "")
-            method_arguments = method_match[0].split(",")
+            method_arguments = method_match[1].split(",")
 
             result.send(method_name, *method_arguments)
           else
