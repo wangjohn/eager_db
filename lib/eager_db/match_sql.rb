@@ -4,7 +4,7 @@ module EagerDB
       attr_reader :index
 
       def initialize(index)
-        @index = index
+        @index = index.to_i
       end
     end
 
