@@ -24,12 +24,12 @@ class EagerloadQueryJobTest < EagerDB::Test
   end
 
   def test_no_communication_channel_raises_error
-    job = EagerDB::EagerloadQueryJob.new({
-      sql: "SELECT * FROM users WHERE name = 'ryan'",
-      result: {id: 12345, name: 'ryan', brother: 'john'}, 
-      processor_aggregator: @aggregator,
-    })
     assert_raises ArgumentError do
+      job = EagerDB::EagerloadQueryJob.new({
+        sql: "SELECT * FROM users WHERE name = 'ryan'",
+        result: {id: 12345, name: 'ryan', brother: 'john'}, 
+        processor_aggregator: @aggregator,
+      })
       job.work
     end
   end
