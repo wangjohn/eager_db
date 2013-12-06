@@ -3,11 +3,15 @@ require 'cases/helper'
 class AbstractProcessorAggregatorTest < EagerDB::Test
   def setup
     @processor_aggregator = EagerDB::ProcessorAggregator::AbstractProcessorAggregator.new
+    db_endpoint = EagerDB::Endpoints::DatabaseEndpoint.new(Proc.new { |k| })
+    eager_endpoint = EagerDB::Endpoints::EagerDBEndpoint.new([], @processor_aggregator)
+    @communication_channel = EagerDB::CommunicationChannel.new(db_endpoint, eager_endpoint)
   end
 
   def test_empty_processor_aggregator
     job = EagerDB::EagerloadQueryJob.new(
       sql: "SELECT * FROM users WHERE name = 'john'",
+      communication_channel: @communication_channel,
       processor_aggregator: @processor_aggregator)
     result = @processor_aggregator.process_job(job)
 
@@ -18,6 +22,7 @@ class AbstractProcessorAggregatorTest < EagerDB::Test
   def test_single_processor_in_processor_aggregator
     job = EagerDB::EagerloadQueryJob.new(
       sql: "SELECT * FROM users WHERE name = 'john'",
+      communication_channel: @communication_channel,
       processor_aggregator: @processor_aggregator)
 
     match_statement = EagerDB::SqlStatement.new("SELECT * FROM users WHERE name = ?")
@@ -38,6 +43,7 @@ class AbstractProcessorAggregatorTest < EagerDB::Test
   def test_multiple_processors_in_processor_aggregator
     job = EagerDB::EagerloadQueryJob.new(
       sql: "SELECT * FROM users WHERE name = 'john'",
+      communication_channel: @communication_channel,
       processor_aggregator: @processor_aggregator)
 
     match_statement = EagerDB::SqlStatement.new("SELECT * FROM users WHERE name = ?")
@@ -64,6 +70,7 @@ class AbstractProcessorAggregatorTest < EagerDB::Test
     job = EagerDB::EagerloadQueryJob.new(
       sql: "SELECT * FROM users WHERE name = 'john'",
       result: { id: 12345 },
+      communication_channel: @communication_channel,
       processor_aggregator: @processor_aggregator)
 
     match_statement1 = EagerDB::SqlStatement.new("SELECT * FROM users WHERE name = ?")
