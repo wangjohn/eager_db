@@ -3,4 +3,4 @@
 
 - "SELECT * FROM pinterest WHERE pin = ? AND interest = ?"
   => "SELECT * FROM tables WHERE pin = ? AND interest = ?", match_bind_value(0), match_bind_value(1)
-  => "SELECT * FROM interests WHERE interest = ? AND pinterest_id = ?", match_bind_value(0), match_result.id
+  => "SELECT * FROM interests WHERE interest = ? AND pinterest_id = ?", match_bind_value(1), match_result.id
