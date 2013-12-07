@@ -5,6 +5,13 @@ EagerDB is a database management layer for preloading queries. Think of it as a
 predictive cache warming tool. It listens to your incoming SQL queries and warms
 your cache with queries that you are likely to make.
 
+Development Progress
+====================
+
+EagerDB is currently in development (Version 0) and not quite ready to release yet.
+If you find any issues or would like to collaborate, please email wangjohn@mit.edu
+and I'd love to talk!
+
 
 Getting Started
 ===============
