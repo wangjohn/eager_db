@@ -21,23 +21,28 @@ user is looking for the apple pies that grandma made:
     SELECT * FROM pies WHERE name = 'apple_pie' AND creator = 'grandma'
 
 With high probability, you know that user is then looking to try to look for the
-recipe to that specific applie pie:
+recipe to that specific applie pie. Let's say you got back a result from your
+original query which was something like: 
 
-    SELECT * FROM recipes WHERE recipe_name = 'apple_pie' AND creator = 'grandma'
+    { id: 553, name: 'apple_pie', creator: 'grandma', recipe_id: 234 }
+
+Then, you might want to go ahead and warm your database's cache with the following
+query:
+
+    SELECT * FROM recipes WHERE id = 234 AND creator = 'grandma'
 
 However, you'd really like this to be more general. You know that whenever a user
 is looking for any type of apple pie with any type of creator, then you should
-preload the recipe for that apple pie with that creator.
-
-You can do just that in EagerDB. Just write the following:
+preload the recipe for that apple pie with that creator. You can do just that in EagerDB. 
+Just write the following:
 
     - "SELECT * FROM pies WHERE name = ? AND creator = ?"
-        => "SELECT * FROM recipes WHERE recipe_id = ? AND creator = ?", match_result.id, match_bind_value(1)
+        => "SELECT * FROM recipes WHERE id = ? AND creator = ?", match_result.recipe_id, match_bind_value(1)
 
 There are a couple things here to note about syntax, the dash `-` at the beginning
 of the first line signifies that you want to match on that statement. It tells
 EagerDB that whenever you see the following statement, preload the statements
-that come after this which are denoted with a hash rocket `=>`.
+that come after which are preceded by a hash rocket `=>`.
 
 You can use `match_bind_value(index)` to get the bind value from the matching
 statement. Bind values are the values which are replaced by question marks `?`.
@@ -45,7 +50,7 @@ So in our example, `match_bind_value(1)` will correspond to the second
 bind value (we index by 0) which in our example would be `grandma`.
 
 You can also use `match_result` to use the result from the match query. By specifying
-`match_result.id`, you are getting the `id` from the result of the original matched
-query. Of course, if you try to use columns that don't exist for a particular result,
-you'll get an error so make sure to check your schema beforehand!
+`match_result.recipe_id`, you are getting the `recipe_id` from the result of the
+original matched query. Of course, if you try to use columns that don't exist
+for a particular result, you'll get an error so make sure to check your schema beforehand!
 
