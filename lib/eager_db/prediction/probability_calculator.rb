@@ -67,7 +67,11 @@ module EagerDB
             (log.processed_at - current_log.processed_at) <= time_threshold
           end
 
-          verified_transitions.each do |log|
+          unique_logs = verified_transitions.uniq do |log|
+            log.non_binded_sql
+          end
+
+          unique_logs.each do |log|
             current_storage.add_transition(
               log.processed_at - current_log.processed_at,
               log.non_binded_sql)
