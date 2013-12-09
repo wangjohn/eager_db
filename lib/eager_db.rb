@@ -11,6 +11,7 @@ module EagerDB
   autoload :FileConverter
   autoload :MatchSql
   autoload :Message
+  autoload :Prediction
   autoload :Processors
   autoload :ProcessorAggregator
   autoload :SqlStatement
