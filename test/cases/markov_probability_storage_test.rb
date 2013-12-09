@@ -31,4 +31,20 @@ class MarkovProbabilityStorageTest < EagerDB::Test
     assert_equal 0.5, probs[statement1]
     assert_equal 0.5, probs[statement2]
   end
+
+  def test_many_statements_and_non_uniform_distribution
+    statements = 1.upto(20).collect { |i| "statement#{i}" }
+    statements += 1.upto(10).collect { |i| "statement#{(i % 5) + 1}" }
+    statements += 1.upto(5).collect { |i| "statement15" }
+
+    statements.each do |statement|
+      @storage.add_transition(1.0, statement)
+    end
+    probs = @storage.probabilities
+
+    assert_equal 20, probs.length
+    assert_equal 1.0/35, probs["statement20"]
+    assert_equal 3.0/35, probs["statement1"]
+    assert_equal 6.0/35, probs["statement15"]
+  end
 end
