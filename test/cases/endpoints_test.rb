@@ -42,11 +42,20 @@ class DatabaseEndpointTest < EagerDB::Test
   end
 end
 
+class TestResque < Array
+  def enqueue(job_type, job)
+    self << job
+  end
+end
+
 class EagerDBEndpointTest < EagerDB::Test
   def setup
-    @resque = []
+    @resque = TestResque.new
     @processor_aggregator = "Some string that will stand in for an aggregator"
     @endpoint = EagerDB::Endpoints::EagerDBEndpoint.new(@resque, @processor_aggregator)
+
+    db_endpoint = EagerDB::Endpoints::DatabaseEndpoint.new(Proc.new { |k| })
+    @channel = EagerDB::CommunicationChannel.new(db_endpoint, @endpoint)
   end
 
   def test_creates_simple_job
