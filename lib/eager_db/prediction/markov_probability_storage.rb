@@ -10,9 +10,12 @@ module EagerDB
         @transitions = Hash.new { |h,k| h[k] = [] }
       end
 
+      def increment_total_occurrences
+        @total_occurrences += 1
+      end
+
       def add_transition(time_difference, statement)
         @transitions[statement] << time_difference
-        @total_occurrences += 1
       end
 
       def probabilities

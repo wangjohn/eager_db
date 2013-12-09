@@ -41,28 +41,29 @@ module EagerDB
         def process_user_logs(user_logs)
           rolling_group = []
           index = 1
-          current_log = user_logs.first
+          current_log = user_logs[0]
 
           while index < user_logs.length or !rolling_group.empty?
             if index < user_logs.length
               log = user_logs[index]
 
-              if log.processed_at < current_log.processed_at + time_threshold
-                rolling_group << log
-              else
-                make_transition(current_log, rolling_group)
-                current_log = log
+              if log.processed_at > current_log.processed_at + time_threshold
+                make_transitions(current_log, rolling_group)
+                current_log = rolling_group.shift
               end
+
+              rolling_group << log
               index += 1
             else
-              make_transition(current_log, rolling_group)
+              make_transitions(current_log, rolling_group)
               current_log = rolling_group.shift
             end
           end
         end
 
-        def make_transition(current_log, rolling_group)
+        def make_transitions(current_log, rolling_group)
           current_storage = probability_storage[current_log.non_binded_sql]
+          current_storage.increment_total_occurrences
 
           rolling_group.each do |log|
             time_difference = log.processed_at - current_log.processed_at
