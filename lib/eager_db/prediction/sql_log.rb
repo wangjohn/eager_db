@@ -11,7 +11,7 @@ module EagerDB
 
       def non_binded_sql
         @sql_statement ||= EagerDB::SqlStatement.new(raw_sql)
-        @sql_statement.raw_sql
+        @sql_statement.non_binded_sql
       end
 
       def bind_values

@@ -1,29 +1,29 @@
 module EagerDB
   class SqlStatement
-    attr_reader :raw_sql, :bind_values
+    attr_reader :non_binded_sql, :bind_values
 
-    def initialize(raw_sql, bind_values = nil)
+    def initialize(non_binded_sql, bind_values = nil)
       if bind_values
         unless bind_values.is_a?(Array)
           raise ArgumentError, "Bind values must be given in an array."
         end
 
-        @raw_sql = raw_sql
+        @non_binded_sql = non_binded_sql
         @bind_values = bind_values
       else
-        @raw_sql = remove_bind_values(raw_sql)
-        @bind_values = raw_sql.scan(bind_values_regex).flatten
+        @non_binded_sql = remove_bind_values(non_binded_sql)
+        @bind_values = non_binded_sql.scan(bind_values_regex).flatten
       end
     end
 
     def matches?(sql)
       if sql.is_a?(SqlStatement)
-        nonbinded_sql = sql.raw_sql
+        nonbinded_sql = sql.non_binded_sql
       else
         nonbinded_sql = remove_bind_values(sql)
       end
 
-      @raw_sql.downcase == nonbinded_sql.downcase
+      @non_binded_sql.downcase == nonbinded_sql.downcase
     end
 
     # Options takes +:result+ and +:sql_statement+
@@ -42,7 +42,7 @@ module EagerDB
       end
 
       counter = -1
-      raw_sql.gsub(/\?/) do |bind_val_marker|
+      non_binded_sql.gsub(/\?/) do |bind_val_marker|
         counter += 1
         bind_vals[counter]
       end

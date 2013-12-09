@@ -19,14 +19,14 @@ class EagerDB::SqlStatementTest < EagerDB::Test
     complex_statement = EagerDB::SqlStatement.new(@complex_sql)
 
     assert_equal ["5", "'john'", "2342342", "5"], complex_statement.bind_values
-    assert_equal @complex_raw.downcase, complex_statement.raw_sql.downcase
+    assert_equal @complex_raw.downcase, complex_statement.non_binded_sql.downcase
     assert complex_statement.matches?(@complex_sql)
     assert complex_statement.matches?(@complex_raw)
 
     simple_statement = EagerDB::SqlStatement.new(@simple_sql)
 
     assert_equal ["'5'", "'john'"], simple_statement.bind_values
-    assert_equal @simple_raw.downcase, simple_statement.raw_sql.downcase
+    assert_equal @simple_raw.downcase, simple_statement.non_binded_sql.downcase
     assert simple_statement.matches?(@simple_sql)
     assert simple_statement.matches?(@simple_raw)
   end
@@ -73,7 +73,7 @@ class EagerDB::SqlStatementTest < EagerDB::Test
 
     assert simple_statement.matches?(@simple_raw)
     assert_equal [], simple_statement.bind_values
-    assert_equal @simple_raw, simple_statement.raw_sql
+    assert_equal @simple_raw, simple_statement.non_binded_sql
   end
 
   def test_inject_result_values

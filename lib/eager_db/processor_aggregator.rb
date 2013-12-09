@@ -19,7 +19,7 @@ module EagerDB
 
       def process_job(query_job)
         statement = EagerDB::SqlStatement.new(query_job.sql)
-        preloads = matching_processors(statement.raw_sql).collect do |processor|
+        preloads = matching_processors(statement.non_binded_sql).collect do |processor|
           processor.process_preloads(statement, query_job.result)
         end
 
@@ -33,14 +33,14 @@ module EagerDB
       end
 
       def add_processor(processor)
-        @processors[processor.match_statement.raw_sql] ||= []
-        @processors[processor.match_statement.raw_sql] << processor
+        @processors[processor.match_statement.non_binded_sql] ||= []
+        @processors[processor.match_statement.non_binded_sql] << processor
       end
 
       def matching_processors(sql)
         statement = EagerDB::SqlStatement.new(sql)
 
-        @processors[statement.raw_sql].collect do |processor|
+        @processors[statement.non_binded_sql].collect do |processor|
           processor.matches?(sql)
         end
       end

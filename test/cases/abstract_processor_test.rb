@@ -23,7 +23,7 @@ class AbstractProcessorTest < EagerDB::Test
     assert_equal 2, @processor.preload_statements.length
 
     second_preload = @processor.preload_statements[1]
-    assert_equal "SELECT * FROM tables WHERE table_id = ?", second_preload.raw_sql
+    assert_equal "SELECT * FROM tables WHERE table_id = ?", second_preload.non_binded_sql
     assert_equal 1, second_preload.bind_values.length
     assert_equal :table_id, second_preload.bind_values[0].name
   end
