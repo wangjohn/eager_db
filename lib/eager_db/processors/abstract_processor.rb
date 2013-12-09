@@ -42,7 +42,7 @@ module EagerDB
 
           @preload_statements.collect do |statement|
             statement.inject_values(options)
-          end
+          end.flatten
         else
           []
         end

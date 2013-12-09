@@ -31,9 +31,7 @@ module EagerDB
 
       def method_missing(method, *args, &block)
         if processor.result_variable?(method)
-          self.class.instance_eval do
-            define_method(method) { get_variable(method) }
-          end
+          define_singleton_method(method) { get_variable(method) }
 
           get_variable(method)
         else

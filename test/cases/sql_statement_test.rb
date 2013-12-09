@@ -84,7 +84,7 @@ class EagerDB::SqlStatementTest < EagerDB::Test
 
     injected_statement = simple_statement.inject_values(result: result)
 
-    assert_equal "SELECT * FROM value1", injected_statement
+    assert_equal ["SELECT * FROM value1"], injected_statement
   end
 
   def test_inject_bind_values
@@ -103,6 +103,46 @@ class EagerDB::SqlStatementTest < EagerDB::Test
     statement = EagerDB::SqlStatement.new("", [bind_value0, bind_value1, bind_value2])
 
     injected_statement = simple_statement.inject_values(sql_statement: statement)
-    assert_equal "SELECT * FROM #{bind_value2} WHERE user_id = #{bind_value1} AND name = #{bind_value0}", injected_statement
+    assert_equal ["SELECT * FROM #{bind_value2} WHERE user_id = #{bind_value1} AND name = #{bind_value0}"], injected_statement
+  end
+
+  def test_inject_multiple_results
+    processor = FakeProcessor.new
+    match_result = EagerDB::MatchSql::MatchSqlResult.new(FakeProcessor.new)
+    simple_statement = EagerDB::SqlStatement.new("SELECT * FROM ?", [match_result.v1])
+    result = [
+      EagerDB::QueryResult.new({v1: 'value1'}),
+      EagerDB::QueryResult.new({v1: 'value2'}),
+      EagerDB::QueryResult.new({v1: 'value3'})
+    ]
+
+    injected_statement = simple_statement.inject_values(result: result)
+
+    assert_equal 3, injected_statement.length
+    assert_includes injected_statement, "SELECT * FROM value1"
+    assert_includes injected_statement, "SELECT * FROM value2"
+    assert_includes injected_statement, "SELECT * FROM value3"
+  end
+
+  def test_inject_multiple_results_with_bind_values
+    processor = FakeProcessor.new
+    match_result = EagerDB::MatchSql::MatchSqlResult.new(FakeProcessor.new)
+    bind0 = EagerDB::MatchSql::MatchSqlBindVariable.new(0)
+    bind1 = EagerDB::MatchSql::MatchSqlBindVariable.new(1)
+
+    simple_statement = EagerDB::SqlStatement.new("SELECT * FROM ? WHERE user_id = ? AND name = ?", [bind1, bind0, match_result.v4])
+
+    bind_value0 = "'johnny boi'"
+    bind_value1 = "'sherwinning'"
+    result = [
+      EagerDB::QueryResult.new({v4: 'value1'}),
+      EagerDB::QueryResult.new({v4: 'value2'})
+    ]
+    statement = EagerDB::SqlStatement.new("", [bind_value0, bind_value1])
+    injected_statement = simple_statement.inject_values(result: result, sql_statement: statement)
+
+    assert_equal 2, injected_statement.length
+    assert_includes injected_statement, "SELECT * FROM 'sherwinning' WHERE user_id = 'johnny boi' AND name = value1"
+    assert_includes injected_statement, "SELECT * FROM 'sherwinning' WHERE user_id = 'johnny boi' AND name = value2"
   end
 end

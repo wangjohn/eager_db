@@ -27,38 +27,68 @@ module EagerDB
     end
 
     # Options takes +:result+ and +:sql_statement+
+    #
+    # +:result+ must be a QueryResult or a hash representing a result, or an
+    # array of QueryResults and/or hashes.
     def inject_values(options = {})
-      result = parse_result(options)
+      results = parse_result(options)
       sql_statement = parse_sql_statement(options)
 
-      bind_vals = bind_values.collect do |bind_value|
-        if bind_value.is_a?(MatchSql::MatchSqlResultVariable) && result
-          result.send(bind_value.name)
-        elsif bind_value.is_a?(MatchSql::MatchSqlBindVariable) && sql_statement
-          sql_statement.bind_values[bind_value.index]
-        else
-          bind_value
-        end
-      end
-
-      counter = -1
-      non_binded_sql.gsub(/\?/) do |bind_val_marker|
-        counter += 1
-        bind_vals[counter]
+      results.collect do |result|
+        bind_vals = binds_with_substitutions(bind_values, result, sql_statement)
+        binded_sql(bind_vals)
       end
     end
 
     private
 
+      def binds_with_substitutions(bind_values, result, sql_statement)
+        bind_values.collect do |bind_value|
+          if bind_value.is_a?(MatchSql::MatchSqlResultVariable)
+            unless result
+              raise ArgumentError, "Tried using an instance of MatchSql::MatchSqlResultVariable without providing a result."
+            end
+
+            result.send(bind_value.name)
+          elsif bind_value.is_a?(MatchSql::MatchSqlBindVariable) && sql_statement
+            unless sql_statement
+              raise ArgumentError, "Tried using an instance of MatchSql::MatchSqlBindVariable without providing a sql_statement."
+            end
+
+            sql_statement.bind_values[bind_value.index]
+          else
+            bind_value
+          end
+        end
+      end
+
+      def binded_sql(bind_vals)
+        counter = -1
+        non_binded_sql.gsub(/\?/) do |bind_val_marker|
+          counter += 1
+          bind_vals[counter]
+        end
+      end
+
       def parse_result(options)
         if (result = options[:result])
-          if result.is_a?(EagerDB::QueryResult)
-            result
-          elsif result.is_a?(Hash)
-            EagerDB::QueryResult.new(result)
+          if result.is_a?(Array)
+            result.collect { |row| parse_single_row(row) }
           else
-            raise ArgumentError, "Must pass either a QueryResult or a Hash for the :result option"
+            [parse_single_row(result)]
           end
+        else
+          [EagerDB::QueryResult.new]
+        end
+      end
+
+      def parse_single_row(result)
+        if result.is_a?(EagerDB::QueryResult)
+          result
+        elsif result.is_a?(Hash)
+          EagerDB::QueryResult.new(result)
+        else
+          raise ArgumentError, "Must pass either a QueryResult, a Hash, or an array of QueryResults and Hashes for the :result option"
         end
       end
 

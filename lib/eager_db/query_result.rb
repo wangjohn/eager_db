@@ -10,9 +10,7 @@ module EagerDB
     end
 
     def add_value_mapping(name, value)
-      self.class.instance_eval do
-        define_method(name) { value }
-      end
+      define_singleton_method(name) { value }
     end
 
     def method_missing(method, *args, &block)
