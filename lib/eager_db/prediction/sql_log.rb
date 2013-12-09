@@ -1,11 +1,12 @@
 module EagerDB
   module Prediction
     class SqlLog
-      attr_reader :raw_sql, :processed_at
+      attr_reader :raw_sql, :processed_at, :user
 
-      def initialize(raw_sql, processed_at)
+      def initialize(raw_sql, processed_at, user)
         @raw_sql = raw_sql
         @processed_at = processed_at
+        @user = user
       end
 
       def non_binded_sql

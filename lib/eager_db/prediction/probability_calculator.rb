@@ -7,12 +7,14 @@ module EagerDB
         @logs = logs
         @time_threshold = time_threshold
 
-        @probability_storage = Hash.new { |h,k| h[statement] = MarkovProbabilityStorage.new(statement) }
+        @probability_storage = Hash.new { |h,statement| h[statement] = MarkovProbabilityStorage.new(statement) }
         @processed = false
       end
 
       def process
-        @logs.each do |user, user_logs|
+        grouped_logs = @logs.group_by { |log| log.user }
+
+        grouped_logs.each do |user, user_logs|
           process_user_logs(user_logs)
         end
 
@@ -37,20 +39,23 @@ module EagerDB
       private
 
         def process_user_logs(user_logs)
-          current_log = nil
           rolling_group = []
+          index = 1
+          current_log = user_logs.first
 
-          user_logs.each do |log|
-            if current_log
+          while index < user_logs.length or !rolling_group.empty?
+            if index < user_logs.length
+              log = user_logs[index]
+
               if log.processed_at < current_log.processed_at + time_threshold
                 rolling_group << log
               else
                 make_transition(current_log, rolling_group)
-                current_log = nil
+                current_log = log
               end
-            elsif rolling_group.empty?
-              rolling_group << log
+              index += 1
             else
+              make_transition(current_log, rolling_group)
               current_log = rolling_group.shift
             end
           end
