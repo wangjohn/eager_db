@@ -63,11 +63,14 @@ module EagerDB
           current_storage = probability_storage[current_log.non_binded_sql]
           current_storage.increment_total_occurrences
 
-          rolling_group.each do |log|
-            time_difference = log.processed_at - current_log.processed_at
-            if time_difference <= time_threshold
-              current_storage.add_transition(time_difference, log.non_binded_sql)
-            end
+          verified_transitions = rolling_group.take_while do |log|
+            (log.processed_at - current_log.processed_at) <= time_threshold
+          end
+
+          verified_transitions.each do |log|
+            current_storage.add_transition(
+              log.processed_at - current_log.processed_at,
+              log.non_binded_sql)
           end
 
           rolling_group.shift
