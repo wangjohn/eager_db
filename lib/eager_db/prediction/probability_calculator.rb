@@ -48,15 +48,13 @@ module EagerDB
               log = user_logs[index]
 
               if log.processed_at > current_log.processed_at + time_threshold
-                make_transitions(current_log, rolling_group)
-                current_log = rolling_group.shift
+                current_log = make_transitions(current_log, rolling_group)
               end
 
               rolling_group << log
               index += 1
             else
-              make_transitions(current_log, rolling_group)
-              current_log = rolling_group.shift
+              current_log = make_transitions(current_log, rolling_group)
             end
           end
         end
@@ -67,8 +65,12 @@ module EagerDB
 
           rolling_group.each do |log|
             time_difference = log.processed_at - current_log.processed_at
-            current_storage.add_transition(time_difference, log.non_binded_sql)
+            if time_difference <= time_threshold
+              current_storage.add_transition(time_difference, log.non_binded_sql)
+            end
           end
+
+          rolling_group.shift
         end
     end
   end
