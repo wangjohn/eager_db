@@ -46,13 +46,13 @@ module EagerDB
         bind_values.collect do |bind_value|
           if bind_value.is_a?(MatchSql::MatchSqlResultVariable)
             unless result
-              raise ArgumentError, "Tried using an instance of MatchSql::MatchSqlResultVariable without providing a result."
+              raise ArgumentError, "Tried using `match_result` without providing a result."
             end
 
             result.send(bind_value.name)
           elsif bind_value.is_a?(MatchSql::MatchSqlBindVariable) && sql_statement
             unless sql_statement
-              raise ArgumentError, "Tried using an instance of MatchSql::MatchSqlBindVariable without providing a sql_statement."
+              raise ArgumentError, "Tried using `match_bind_value` without providing a sql_statement."
             end
 
             sql_statement.bind_values[bind_value.index]
