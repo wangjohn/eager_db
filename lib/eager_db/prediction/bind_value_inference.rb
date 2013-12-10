@@ -20,11 +20,35 @@ module EagerDB
       private
 
         def perform_bind_value_inference(binded_preloads)
-          binds = []
+          bind_counter = TransitionBindValueCounter.new
 
           binded_preloads.each do |match, preload|
+            match_bind_indices = {}
+            match.sql_statement.bind_values.each_with_index do |val, index|
+              match_bind_indices[val] = index
+            end
 
+            preload.sql_statement.bind_values.each_with_index do |val, index|
+              if match_bind_indices.include?(val)
+                bind_counter.add_bind_equality(match_index, preload_index)
+              end
+            end
           end
+
+          bind_counter
         end
+    end
+
+    class TransitionBindValueCounter
+      attr_reader :storage
+
+      def initialize
+        @storage = Hash.new { |h,k| h[k] = 0 }
+      end
+
+      def add_bind_equality(match_index, preload_index)
+        storage[match_index][preload_index] += 1
+      end
+    end
   end
 end

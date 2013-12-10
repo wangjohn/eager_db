@@ -18,14 +18,14 @@ module EagerDB
         @total_occurrences += 1
       end
 
-      def add_transition(time_difference, statement)
-        @transitions[statement] << time_difference
+      def add_transition(match, statement)
+        @transitions[match.non_binded_sql] << [match, statement]
       end
 
       def probabilities
         result = {}
-        @transitions.each do |statement, time_differences|
-          result[statement] = time_differences.length.to_f / @total_occurrences
+        @transitions.each do |match, statement_tuples|
+          result[match.non_binded_sql] = statement_tuples.length.to_f / @total_occurrences
         end
 
         result
