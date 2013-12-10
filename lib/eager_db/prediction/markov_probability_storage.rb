@@ -10,6 +10,10 @@ module EagerDB
         @transitions = Hash.new { |h,k| h[k] = [] }
       end
 
+      def binded_preloads(preload)
+        @transitions[preload]
+      end
+
       def increment_total_occurrences
         @total_occurrences += 1
       end
