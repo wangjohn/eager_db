@@ -173,8 +173,8 @@ def threaded_run(channel_options, num_threads = 1)
   latency_storage = Benchmark::LatencyStorage.new
   client = Mysql2::Client.new(:host => "localhost", :username => "root", :database => 'test')
   db_proc = Proc.new { |q| client.query(q) }
-  #channel = EagerDB::Base.create_channel(db_proc, channel_options)
-  channel = nil
+  channel = EagerDB::Base.create_channel(db_proc, channel_options)
+  #channel = nil
 
   threads = []
   num_threads.times do |i|
