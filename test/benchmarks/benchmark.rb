@@ -2,11 +2,32 @@ module Benchmark
   class MarkovTransition
     def initialize(transaction_types)
       @transaction_types = transaction_types
+      @current_transaction = nil
     end
 
-    def generate_transaction
-      
+    def generate_statement(previous_binds, previous_result)
+      @current_transaction ||= pick_starting_transaction
+
+      if @current_transaction.current_child
+        @current_transaction = @current_transaction.current_child
+        bind_values = @current_transaction.continuation_bind_values(previous_binds, previous_result)
+      else
+        bind_values = @current_transaction.random_bind_values
+      end
+
+      @current_transaction.generate(random_bind_values)
     end
+
+    private
+
+      def pick_starting_transaction
+        random_num = rand
+
+        @transaction_types.inject(0) do |sum, transaction|
+          sum += transaction[1]
+          return transaction[0] if random_num <= sum
+        end
+      end
   end
 
   class AbstractTransactionType
