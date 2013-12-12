@@ -11,7 +11,11 @@ module Benchmark
 
       1.upto(times) do |i|
         statement = @markov_transition.generate_statement(previous_result)
-        previous_result = @connection.execute(statement)
+        puts statement
+        start = Time.now
+        previous_result = @connection.query(statement)
+        finish = Time.now
+        puts "Executed in: #{finish - start}"
         sleep(@sleep_time)
       end
     end
@@ -25,14 +29,13 @@ module Benchmark
     end
 
     def generate_statement(previous_result)
-      @current_transaction ||= pick_starting_transaction
-
-      if @current_transaction.current_child
+      if @current_transaction && @current_transaction.current_child
         prev_transaction = @current_transaction
         @current_transaction = @current_transaction.current_child
         bind_values = @current_transaction.continuation_bind_values(
           prev_transaction, @previous_binds, previous_result)
       else
+        @current_transaction = pick_starting_transaction
         bind_values = @current_transaction.random_bind_values
       end
 
@@ -45,8 +48,8 @@ module Benchmark
         random_num = rand
 
         @transaction_types.inject(0) do |sum, transaction|
-          sum += transaction[1]
-          return transaction[0] if random_num <= sum
+          return transaction[0] if random_num <= sum + transaction[1]
+          sum + transaction[1]
         end
       end
   end
@@ -79,13 +82,18 @@ module Benchmark
       raise "Not implemented"
     end
 
+    def random_row_attribute(result, attribute)
+      index = rand(result.count)
+      result.each_with_index { |row, i| return row[attribute] if index == index }
+    end
+
     def generate(bind_values)
-      counter = 0
+      counter = -1
       set_current_child!
 
-      @non_binded_sql.gsub(/\?/) do |match|
-        bind_values[counter]
+      non_binded_sql.gsub(/\?/) do |match|
         counter += 1
+        bind_values[counter]
       end
     end
 
@@ -105,11 +113,12 @@ module Benchmark
         random_num = rand
 
         @potential_children.inject(0) do |sum, element|
-          sum += element[1]
-          if random_num <= sum
+          if random_num <= sum + element[1]
             @current_child = element[0]
             return
           end
+
+          sum + element[1]
         end
 
         @current_child = nil

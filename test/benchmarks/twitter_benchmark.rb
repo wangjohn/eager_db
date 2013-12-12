@@ -6,18 +6,54 @@ module Benchmark
     class GetFollowers < AbstractTransactionType
       def continuation_bind_values(previous_transaction, previous_binds, previous_result)
         if previous_transaction.is_a?(GetUserTweets)
-          [previous_result.id]
+          [random_row_attribute(previous_result, 'uid')]
         else
           random_bind_values
         end
       end
 
       def random_bind_values
-        [(rand * 1000).to_i]
+        [rand(100)]
       end
 
       def non_binded_sql
         "SELECT f2 FROM followers WHERE f1 = ? LIMIT 20"
+      end
+    end
+
+    class GetFollows < AbstractTransactionType
+      def continuation_bind_values(previous_transaction, previous_binds, previous_result)
+        if previous_transaction.is_a?(GetUserTweets)
+          [random_row_attribute(previous_result, 'uid')]
+        else
+          random_bind_values
+        end
+      end
+
+      def random_bind_values
+        [rand(100)]
+      end
+
+      def non_binded_sql
+        "SELECT f2 FROM follows WHERE f1 = ? LIMIT 20"
+      end
+    end
+
+    class GetUserTweets < AbstractTransactionType
+      def continuation_bind_values(previous_transaction, previous_binds, previous_result)
+        if previous_transaction.is_a?(GetFollowers) || previous_transaction.is_a?(GetFollows)
+          [random_row_attribute(previous_result, 'f2')]
+        else
+          random_bind_values
+        end
+      end
+
+      def random_bind_values
+        [rand(100)]
+      end
+
+      def non_binded_sql
+        "SELECT * FROM tweets WHERE uid = ?"
       end
     end
   end
@@ -56,46 +92,66 @@ end
 
 client = Mysql2::Client.new(:host => "localhost", :username => "root", :database => 'test')
 
-setup = SetupDatabase.new(client)
-setup.create_table('user_profiles', ['id INT', "name CHAR(20)"])
-setup.create_table('follows', ['f1 INT', 'f2 INT'])
-setup.create_table('tweets', ['uid INT', 'name CHAR(20)'])
-setup.create_table('followers', ['f1 INT', 'f2 INT'])
-
 NUM_USERS = 100
 NUM_TWEETS = 50 * NUM_USERS
 NUM_FOLLOWERS = 20 * NUM_USERS
 NUM_FOLLOWS = 20 * NUM_USERS
 
-puts "Inserting Users into database"
-NUM_USERS.times do |t|
-  setup.insert_record('user_profiles', [["id", t], ["name", t.to_s]])
-end
+def setup_twitter_database(client)
+  setup = SetupDatabase.new(client)
+  setup.create_table('user_profiles', ['id INT', "name CHAR(20)"])
+  setup.create_table('follows', ['f1 INT', 'f2 INT'])
+  setup.create_table('tweets', ['uid INT', 'name CHAR(20)'])
+  setup.create_table('followers', ['f1 INT', 'f2 INT'])
 
-puts "Inserting Tweets into database"
-NUM_TWEETS.times do |t|
-  setup.insert_record('tweets', [['uid', t % NUM_USERS], ['name', t.to_s]])
-end
 
-puts "Inserting followers into database"
-NUM_FOLLOWERS.times do |t|
-  user1 = (rand * NUM_USERS).to_i
-  user2 = (rand * NUM_USERS).to_i
-  if (user1 != user2)
-    setup.insert_record('followers', [['f1', user1], ['f2', user2]])
+  puts "Inserting Users into database"
+  NUM_USERS.times do |t|
+    puts "Inserted #{t} users" if t % 20 == 0
+    setup.insert_record('user_profiles', [["id", t], ["name", t.to_s]])
+  end
+
+  puts "Inserting Tweets into database"
+  NUM_TWEETS.times do |t|
+    puts "Inserted #{t} tweets" if t % 20 == 0
+    setup.insert_record('tweets', [['uid', t % NUM_USERS], ['name', t.to_s]])
+  end
+
+  puts "Inserting followers into database"
+  NUM_FOLLOWERS.times do |t|
+    puts "Inserted #{t} followers" if t % 20 == 0
+    user1 = (rand * NUM_USERS).to_i
+    user2 = (rand * NUM_USERS).to_i
+    if (user1 != user2)
+      setup.insert_record('followers', [['f1', user1], ['f2', user2]])
+    end
+  end
+
+  puts "Inserting follows into database"
+  NUM_FOLLOWS.times do |t|
+    puts "Inserted #{t} follows" if t % 20 == 0
+    user1 = (rand * NUM_USERS).to_i
+    user2 = (rand * NUM_USERS).to_i
+    if (user1 != user2)
+      setup.insert_record('follows', [['f1', user1], ['f2', user2]])
+    end
   end
 end
 
-puts "Inserting follows into database"
-NUM_FOLLOWS.times do |t|
-  user1 = (rand * NUM_USERS).to_i
-  user2 = (rand * NUM_USERS).to_i
-  if (user1 != user2)
-    setup.insert_record('follows', [['f1', user1], ['f2', user2]])
-  end
-end
+get_followers = Benchmark::TwitterBenchmark::GetFollowers.new({})
+get_user_tweets = Benchmark::TwitterBenchmark::GetUserTweets.new({})
+get_follows = Benchmark::TwitterBenchmark::GetFollows.new({})
 
-rs = client.query("SELECT * FROM user_profiles WHERE name = '14'")
-rs.each do |row|
-  p row
-end
+get_user_tweets.add_child(get_followers, 0.3)
+get_user_tweets.add_child(get_follows, 0.3)
+get_follows.add_child(get_user_tweets, 0.3)
+get_followers.add_child(get_user_tweets, 0.3)
+
+transactions = {
+  get_followers => 0.3,
+  get_follows => 0.3,
+  get_user_tweets => 0.4
+}
+
+process = Benchmark::MarkovProcess.new(transactions, client)
+process.run(30)
