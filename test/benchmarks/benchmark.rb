@@ -7,7 +7,7 @@ module Benchmark
       @connection = options[:connection]
       @sleep_time = options[:sleep_time] || 0.5
       @channel = options[:channel]
-      @latency_storage = options[:storage] || LatencyStorage.new
+      @latency_storage = options[:latency_storage] || LatencyStorage.new
     end
 
     def set_channel(channel)
