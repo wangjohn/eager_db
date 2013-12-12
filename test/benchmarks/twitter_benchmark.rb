@@ -153,5 +153,19 @@ transactions = {
   get_user_tweets => 0.4
 }
 
+class BasicQueue
+  def enqueue(job_type, job)
+    job_type.perform(job)
+  end
+end
+
+db_proc = Proc.new { |q| client.query(q) }
+#channel = EagerDB::Base.create_channel(db_proc, {
+#  resque: BasicQueue.new, 
+#  processor_file: File.expand_path("./twitter_benchmark_mp", __FILE__)
+#})
+
 process = Benchmark::MarkovProcess.new(transactions, client)
-process.run(30)
+#process.set_channel(channel)
+process.run(60)
+p process.average_latencies

@@ -1,13 +1,18 @@
 module Benchmark
   class MarkovProcess
-    attr_reader :latency_storage
+    attr_reader :latency_storage, :channel
 
-    def initialize(transaction_types, connection, sleep_time = 2.0)
+    def initialize(transaction_types, connection, sleep_time = 0.5)
       @markov_transition = MarkovTransition.new(transaction_types)
       @connection = connection
       @sleep_time = sleep_time
+      @channel = nil
 
       @latency_storage = LatencyStorage.new
+    end
+
+    def set_channel(channel)
+      @channel = channel
     end
 
     def run(times = 60)
@@ -18,11 +23,16 @@ module Benchmark
         start = Time.now
         previous_result = @connection.query(statement)
         finish = Time.now
+        channel.process_sql(statement, previous_result) if channel
 
         latency_storage.add_result(finish - start, @markov_transition.current_transaction.class)
 
         sleep(@sleep_time)
       end
+    end
+
+    def average_latencies
+      latency_storage.average_latencies
     end
   end
 
@@ -37,6 +47,15 @@ module Benchmark
       p current_transaction.to_s
       p time
       @storage[current_transaction.to_s] << time
+    end
+
+    def average_latencies
+      @storage.collect do |transaction_type, list|
+        count = list.length
+        average = list.inject(0) { |sum, i| sum + i }.to_f / count
+
+        {type: transaction_type, count: count, average: average}
+      end
     end
   end
 
