@@ -37,7 +37,13 @@ module EagerDB
       end
 
       def process_payload(message)
-        @db_proc.call(message.payload)
+        if message.payload.is_a?(Array)
+          message.payload.each do |query|
+            @db_proc.call(query)
+          end
+        else
+          @db_proc.call(message.payload)
+        end
       end
     end
 

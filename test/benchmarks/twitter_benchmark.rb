@@ -1,5 +1,6 @@
 require './benchmark'
 require 'mysql2'
+require 'eager_db'
 
 module Benchmark
   module TwitterBenchmark
@@ -160,12 +161,14 @@ class BasicQueue
 end
 
 db_proc = Proc.new { |q| client.query(q) }
-#channel = EagerDB::Base.create_channel(db_proc, {
-#  resque: BasicQueue.new, 
-#  processor_file: File.expand_path("./twitter_benchmark_mp", __FILE__)
-#})
+channel = EagerDB::Base.create_channel(db_proc, {
+  resque: BasicQueue.new, 
+  processor_file: File.expand_path("../twitter_benchmark_mp", __FILE__)
+})
 
 process = Benchmark::MarkovProcess.new(transactions, client)
-#process.set_channel(channel)
+process.set_channel(channel)
 process.run(60)
-p process.average_latencies
+process.average_latencies.each do |avg|
+  p avg
+end

@@ -23,7 +23,7 @@ module Benchmark
         start = Time.now
         previous_result = @connection.query(statement)
         finish = Time.now
-        channel.process_sql(statement, previous_result) if channel
+        channel.process_sql(statement, previous_result.to_a) if channel
 
         latency_storage.add_result(finish - start, @markov_transition.current_transaction.class)
 
