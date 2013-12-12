@@ -1,3 +1,8 @@
+  get_user_tweets.add_child(get_followers, 0.3)
+  get_user_tweets.add_child(get_follows, 0.3)
+  get_follows.add_child(get_user_tweets, 0.3)
+  get_followers.add_child(get_user_tweets, 0.3)
+
 {:type=>"Benchmark::TwitterBenchmark::GetFollowers", :count=>283, :average=>0.000192089219081272}
 {:type=>"Benchmark::TwitterBenchmark::GetFollows", :count=>295, :average=>0.00019351036610169498}
 {:type=>"Benchmark::TwitterBenchmark::GetUserTweets", :count=>422, :average=>0.00024600243364928916}

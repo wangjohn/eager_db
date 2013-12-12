@@ -144,20 +144,15 @@ class BasicQueue
   end
 end
 
-def run_processor(latency_storage, channel_options)
-  client = Mysql2::Client.new(:host => "localhost", :username => "root", :database => 'test')
-  db_proc = Proc.new { |q| client.query(q) }
-  #channel = EagerDB::Base.create_channel(db_proc, channel_options)
-  channel = nil
-
+def run_processor(latency_storage, channel_options, client)
   get_followers = Benchmark::TwitterBenchmark::GetFollowers.new({})
   get_user_tweets = Benchmark::TwitterBenchmark::GetUserTweets.new({})
   get_follows = Benchmark::TwitterBenchmark::GetFollows.new({})
 
-  get_user_tweets.add_child(get_followers, 0.3)
-  get_user_tweets.add_child(get_follows, 0.3)
-  get_follows.add_child(get_user_tweets, 0.3)
-  get_followers.add_child(get_user_tweets, 0.3)
+  get_user_tweets.add_child(get_followers, 0.2)
+  get_user_tweets.add_child(get_follows, 0.2)
+  get_follows.add_child(get_user_tweets, 0.2)
+  get_followers.add_child(get_user_tweets, 0.2)
 
   transactions = {
     get_followers => 0.3,
@@ -176,18 +171,18 @@ end
 
 def threaded_run(channel_options, num_threads = 1)
   latency_storage = Benchmark::LatencyStorage.new
+  client = Mysql2::Client.new(:host => "localhost", :username => "root", :database => 'test')
+  db_proc = Proc.new { |q| client.query(q) }
+  channel = EagerDB::Base.create_channel(db_proc, channel_options)
 
-  puts "Starting simulations"
   threads = []
   num_threads.times do |i|
-    puts "Starting thread #{i}"
-    threads << Thread.new { run_processor(latency_storage, channel_options) }
+    threads << Thread.new { run_processor(latency_storage, channel, client) }
   end
   threads.each do |t|
     t.join
   end
 
-  puts "Finished simulations"
   latency_storage.average_latencies.each do |avg|
     p avg
   end
@@ -198,4 +193,4 @@ channel_options = {
   processor_file: File.expand_path("../twitter_benchmark_mp", __FILE__)
 }
 
-threaded_run(channel_options, 2)
+threaded_run(channel_options)

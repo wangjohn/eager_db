@@ -50,8 +50,9 @@ module Benchmark
       @storage.collect do |transaction_type, list|
         count = list.length
         average = list.inject(0) { |sum, i| sum + i }.to_f / count
+        variance = list.inject(0) { |accum, i| accum + (i - average)**2.0 }.to_f / (count - 1)
 
-        {type: transaction_type, count: count, average: average}
+        {type: transaction_type, count: count, average: average, std: (variance)**(0.5)}
       end
     end
   end
