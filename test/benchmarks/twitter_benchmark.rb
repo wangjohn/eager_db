@@ -143,11 +143,6 @@ class BasicQueue
     job_type.perform(job)
   end
 end
-latency_storage = Bechmark::LatencyStorage.new
-channel = EagerDB::Base.create_channel(db_proc, {
-  resque: BasicQueue.new, 
-  processor_file: File.expand_path("../twitter_benchmark_mp", __FILE__)
-})
 
 def run_processor(channel, latency_storage, client)
   get_followers = Benchmark::TwitterBenchmark::GetFollowers.new({})
@@ -165,7 +160,6 @@ def run_processor(channel, latency_storage, client)
     get_user_tweets => 0.4
   }
 
-  db_proc = Proc.new { |q| client.query(q) }
   process = Benchmark::MarkovProcess.new({
     transaction_types: transactions,
     connection: client,
@@ -176,14 +170,20 @@ def run_processor(channel, latency_storage, client)
 end
 
 def threaded_run(client, num_threads = 1)
-  latency_storage = Bechmark::LatencyStorage.new
+  latency_storage = Benchmark::LatencyStorage.new
+  db_proc = Proc.new { |q| client.query(q) }
   channel = EagerDB::Base.create_channel(db_proc, {
     resque: BasicQueue.new, 
     processor_file: File.expand_path("../twitter_benchmark_mp", __FILE__)
   })
 
-  num_threads.times do
-    Thread.new { run_processor(channel, latency_storage, client) }
+  threads = []
+  num_threads.times do |i|
+    puts "Starting thread #{i}"
+    threads << Thread.new { run_processor(channel, latency_storage, client) }
+  end
+  threads.each do |t|
+    t.join
   end
 
   latency_storage.average_latencies.each do |avg|
