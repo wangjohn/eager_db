@@ -1,14 +1,13 @@
 module Benchmark
   class MarkovProcess
-    attr_reader :latency_storage, :channel
+    attr_reader :channel, :latency_storage
 
-    def initialize(transaction_types, connection, sleep_time = 0.5)
-      @markov_transition = MarkovTransition.new(transaction_types)
-      @connection = connection
-      @sleep_time = sleep_time
-      @channel = nil
-
-      @latency_storage = LatencyStorage.new
+    def initialize(options = {})
+      @markov_transition = MarkovTransition.new(options[:transaction_types])
+      @connection = options[:connection]
+      @sleep_time = options[:sleep_time] || 0.5
+      @channel = options[:channel]
+      @latency_storage = options[:storage] || LatencyStorage.new
     end
 
     def set_channel(channel)
@@ -44,8 +43,6 @@ module Benchmark
     end
 
     def add_result(time, current_transaction)
-      p current_transaction.to_s
-      p time
       @storage[current_transaction.to_s] << time
     end
 

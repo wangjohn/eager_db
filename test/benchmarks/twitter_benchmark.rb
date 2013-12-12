@@ -139,6 +139,13 @@ def setup_twitter_database(client)
   end
 end
 
+class BasicQueue
+  def enqueue(job_type, job)
+    job_type.perform(job)
+  end
+end
+latency_storage = Bechmark::LatencyStorage.new
+
 get_followers = Benchmark::TwitterBenchmark::GetFollowers.new({})
 get_user_tweets = Benchmark::TwitterBenchmark::GetUserTweets.new({})
 get_follows = Benchmark::TwitterBenchmark::GetFollows.new({})
@@ -154,21 +161,26 @@ transactions = {
   get_user_tweets => 0.4
 }
 
-class BasicQueue
-  def enqueue(job_type, job)
-    job_type.perform(job)
-  end
-end
-
 db_proc = Proc.new { |q| client.query(q) }
 channel = EagerDB::Base.create_channel(db_proc, {
   resque: BasicQueue.new, 
   processor_file: File.expand_path("../twitter_benchmark_mp", __FILE__)
 })
 
-process = Benchmark::MarkovProcess.new(transactions, client)
+process = Benchmark::MarkovProcess.new({
+  transaction_types: transactions,
+  connection: client,
+  latency_storage: latency_storage
+})
 process.set_channel(channel)
-process.run(60)
+process.run(1000)
+
+if process.channel
+  p "Running benchmark with EagerDB"
+else
+  p "Running benchmark without EagerDB"
+end
+
 process.average_latencies.each do |avg|
   p avg
 end
