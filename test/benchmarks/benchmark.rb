@@ -1,9 +1,13 @@
 module Benchmark
   class MarkovProcess
+    attr_reader :latency_storage
+
     def initialize(transaction_types, connection, sleep_time = 2.0)
       @markov_transition = MarkovTransition.new(transaction_types)
       @connection = connection
       @sleep_time = sleep_time
+
+      @latency_storage = LatencyStorage.new
     end
 
     def run(times = 60)
@@ -11,17 +15,34 @@ module Benchmark
 
       1.upto(times) do |i|
         statement = @markov_transition.generate_statement(previous_result)
-        puts statement
         start = Time.now
         previous_result = @connection.query(statement)
         finish = Time.now
-        puts "Executed in: #{finish - start}"
+
+        latency_storage.add_result(finish - start, @markov_transition.current_transaction.class)
+
         sleep(@sleep_time)
       end
     end
   end
 
+  class LatencyStorage
+    attr_reader :storage
+
+    def initialize
+      @storage = Hash.new { |h,k| h[k] = [] }
+    end
+
+    def add_result(time, current_transaction)
+      p current_transaction.to_s
+      p time
+      @storage[current_transaction.to_s] << time
+    end
+  end
+
   class MarkovTransition
+    attr_reader :current_transaction
+
     def initialize(transaction_types)
       @transaction_types = transaction_types
       @current_transaction = nil
