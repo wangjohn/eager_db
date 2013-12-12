@@ -144,7 +144,7 @@ class BasicQueue
   end
 end
 
-def run_processor(latency_storage, channel_options, client)
+def run_processor(latency_storage, channel, client)
   get_followers = Benchmark::TwitterBenchmark::GetFollowers.new({})
   get_user_tweets = Benchmark::TwitterBenchmark::GetUserTweets.new({})
   get_follows = Benchmark::TwitterBenchmark::GetFollows.new({})
@@ -173,7 +173,8 @@ def threaded_run(channel_options, num_threads = 1)
   latency_storage = Benchmark::LatencyStorage.new
   client = Mysql2::Client.new(:host => "localhost", :username => "root", :database => 'test')
   db_proc = Proc.new { |q| client.query(q) }
-  channel = EagerDB::Base.create_channel(db_proc, channel_options)
+  #channel = EagerDB::Base.create_channel(db_proc, channel_options)
+  channel = nil
 
   threads = []
   num_threads.times do |i|
