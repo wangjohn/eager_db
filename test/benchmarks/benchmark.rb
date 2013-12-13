@@ -48,13 +48,26 @@ module Benchmark
 
     def average_latencies
       @storage.collect do |transaction_type, list|
-        count = list.length
-        average = list.inject(0) { |sum, i| sum + i }.to_f / count
-        variance = list.inject(0) { |accum, i| accum + (i - average)**2.0 }.to_f / (count - 1)
+        new_list = remove_outliers(list)
+        count = new_list.length
+        average = new_list.inject(0) { |sum, i| sum + i }.to_f / count
+        variance = new_list.inject(0) { |accum, i| accum + (i - average)**2.0 }.to_f / (count - 1)
 
         {type: transaction_type, count: count, average: average, std: (variance)**(0.5)}
       end
     end
+
+    private
+
+      def remove_outliers(list)
+        count = list.length
+        average = list.inject(0) { |sum, i| sum + i }.to_f / count
+        variance = list.inject(0) { |accum, i| accum + (i - average)**2.0 }.to_f / (count - 1)
+
+        list.select do |elem|
+          (elem - average).abs < (variance)**(0.5) * 0.4
+        end
+      end
   end
 
   class MarkovTransition

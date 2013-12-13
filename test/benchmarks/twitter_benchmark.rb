@@ -149,10 +149,10 @@ def run_processor(latency_storage, channel, client)
   get_user_tweets = Benchmark::TwitterBenchmark::GetUserTweets.new({})
   get_follows = Benchmark::TwitterBenchmark::GetFollows.new({})
 
-  get_user_tweets.add_child(get_followers, 0.2)
-  get_user_tweets.add_child(get_follows, 0.2)
-  get_follows.add_child(get_user_tweets, 0.2)
-  get_followers.add_child(get_user_tweets, 0.2)
+  get_user_tweets.add_child(get_followers, 0.3)
+  get_user_tweets.add_child(get_follows, 0.3)
+  get_follows.add_child(get_user_tweets, 0.3)
+  get_followers.add_child(get_user_tweets, 0.3)
 
   transactions = {
     get_followers => 0.3,
@@ -176,12 +176,18 @@ def threaded_run(channel_options, num_threads = 1)
   channel = EagerDB::Base.create_channel(db_proc, channel_options)
   #channel = nil
 
-  threads = []
-  num_threads.times do |i|
-    threads << Thread.new { run_processor(latency_storage, channel, client) }
-  end
-  threads.each do |t|
-    t.join
+  #threads = []
+  #num_threads.times do |i|
+  #  threads << Thread.new { run_processor(latency_storage, channel, client) }
+  #end
+  #threads.each do |t|
+  #  t.join
+  #end
+  run_processor(latency_storage, channel, client)
+
+  latency_storage.storage.each do |type, list|
+    puts type
+    list.each { |t| p t }
   end
 
   latency_storage.average_latencies.each do |avg|

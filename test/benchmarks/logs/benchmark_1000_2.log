@@ -1,3 +1,3 @@
+{:type=>"Benchmark::TwitterBenchmark::GetFollows", :count=>302, :average=>0.0002534638874172186, :std=>0.0010147801215928743}
 {:type=>"Benchmark::TwitterBenchmark::GetUserTweets", :count=>397, :average=>0.0009636695239294706, :std=>0.011078027746239892}
 {:type=>"Benchmark::TwitterBenchmark::GetFollowers", :count=>301, :average=>0.000445992707641196, :std=>0.0032527158663955263}
-{:type=>"Benchmark::TwitterBenchmark::GetFollows", :count=>302, :average=>0.0002534638874172186, :std=>0.0010147801215928743}
